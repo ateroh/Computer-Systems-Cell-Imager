@@ -5,7 +5,7 @@
 //To compile (win): gcc cbmp.c main.c -o main.exe -std=c99
 //TO compile (win) for newer: gcc cbmp.c main.c functions.c -o main.exe -std=c99
 //To compile (win): gcc cbmp.c main.c functions.c -o main.exe -std=c99
-//To run (win): main.exe example.bmp example_inv.bmp
+//To run (win): .\main.exe example.bmp example_inv.bmp
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
   printf("Loaded image!\n");
 
   //Run inversion
-   invert(input_image,output_image);
+  //invert(input_image,output_image);
 
   //printf("Inverted image!\n");
 
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
   
   //Save image to file
   write_bitmap(output_image, argv[2]);
-  //printf("Saved image!\n");
+  printf("Saved image!\n");
 
   
 
