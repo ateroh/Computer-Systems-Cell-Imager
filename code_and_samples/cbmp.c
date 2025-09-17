@@ -80,7 +80,12 @@ void _map(BMP* bmp, void (*f)(BMP* bmp, int, int, int));
 void _get_pixel(BMP* bmp, int index, int offset, int channel);
 
 // Public function implementations
-void read_bitmap(char * input_file_path, unsigned char output_image_array[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
+void read_bitmap(char * input_file_path,
+    unsigned char output_image_array[BMP_WIDTH]
+                              [BMP_HEIGTH][BMP_CHANNELS]
+)
+
+{
   // Read image into BMP struct
   BMP* in_bmp = bopen(input_file_path);
   int width = get_width(in_bmp);
