@@ -1,9 +1,10 @@
-//To compile (linux/mac): gcc cbmp.c main.c -o main.out -std=c99 gcc cbmp.c main.c functions.c -o main.out -std=c99
+//To compile (linux/mac): gcc cbmp.c main.c functions.c -o main.out -std=c99
 
 //To run (linux/mac): ./main.out example.bmp example_inv.bmp
 
 //To compile (win): gcc cbmp.c main.c -o main.exe -std=c99
 //TO compile (win) for newer: gcc cbmp.c main.c functions.c -o main.exe -std=c99
+//To compile (win): gcc cbmp.c main.c functions.c -o main.exe -std=c99
 //To run (win): main.exe example.bmp example_inv.bmp
 
 #include <stdlib.h>
@@ -45,7 +46,7 @@ int main(int argc, char** argv)
   printf("Loaded image!\n");
 
   //Run inversion
-  // invert(input_image,output_image);
+   invert(input_image,output_image);
 
   //printf("Inverted image!\n");
 
