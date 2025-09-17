@@ -42,12 +42,25 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
           unsigned char b = input_image[x][y][2];
           output_image[x][y][c] = (r + g + b)/3;
         }
-        
       }
     }
   }
 
-  void binary_threshold(unsigned char gray)
+  void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
+    for (int i = 0; i < BMP_WIDTH; i++) {
+      for (int j = 0; j < BMP_WIDTH; j++) {
+        for (int c = 0; c < BMP_CHANNELS; c++) {
+          unsigned char post_threshold_value;
+
+          if (input_image[i][j][0] > 90) {
+            post_threshold_value = 255;
+          } else {
+            post_threshold_value = 0;
+          }
+        }
+      } 
+    }
+  }
   
   
 //Main function
