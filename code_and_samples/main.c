@@ -49,7 +49,7 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
 // Function to threshold an image Step 3
   void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
     for (int i = 0; i < BMP_WIDTH; i++) {
-      for (int j = 0; j < BMP_WIDTH; j++) {
+      for (int j = 0; j < BMP_HEIGTH; j++) {
         for (int c = 0; c < BMP_CHANNELS; c++) {
           unsigned char post_threshold_value;
 
@@ -57,7 +57,7 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
             post_threshold_value = 255;
           } else {
             post_threshold_value = 0;
-          }
+          } 
         }
       } 
     }
