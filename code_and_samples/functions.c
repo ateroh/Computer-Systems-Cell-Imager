@@ -59,3 +59,18 @@ void basic_erosion(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGT
 
     
 }
+// Count the number of spots in the image that are not black Step 5
+int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
+    int pixel_count = 0;
+    for (int i = 0; i < BMP_WIDTH; i++) {
+        for (int j = 0; j < BMP_HEIGTH; j++) {
+            for (int c = 0; c < BMP_CHANNELS; c++) {
+                if (input_image[i][j][c] == 255) {
+                    pixel_count++;
+                }
+            }
+        }
+    }
+
+    return pixel_count;
+}

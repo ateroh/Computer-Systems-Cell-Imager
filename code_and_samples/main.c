@@ -62,7 +62,11 @@ int main(int argc, char** argv)
   
 
   binary_threshold(THRESHOLD, input_image, output_image);
-  
+
+ int spots = detect_spots(input_image);
+printf("Number of spots: %d\n", spots);
+
+
   //Save image to file
   write_bitmap(output_image, argv[2]);
   printf("Saved image!\n");
