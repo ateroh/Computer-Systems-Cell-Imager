@@ -25,7 +25,6 @@ int main(int argc, char** argv)
 {
 
 clock_t start, end;
-double cpu_time_used;
 
   //argc counts how may arguments are passed
   //argv[0] is a string with the name of the program
@@ -71,8 +70,13 @@ start = clock();
   
 
   printf("Done!\n");
+
+
+// Udregner tid brugt fra CPU https://stackoverflow.com/questions/5248915/execution-time-of-c-program
+
 end = clock();
-cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-printf("Time used: %f seconds\n", cpu_time_used);
+double time_spent = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+printf("Time used: %f seconds\n", time_spent);
   return 0;
 }
