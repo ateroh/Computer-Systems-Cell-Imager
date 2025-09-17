@@ -19,10 +19,6 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
     }
 }
 
-//Declaring the array to store the image (unsigned char = unsigned 8 bit)
-unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
-unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
-
 // Function to convert an image to greyscale Step 2
 void convert_to_greyscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
     for (int x=0; x < BMP_WIDTH; x++) {
@@ -44,12 +40,18 @@ void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HE
             for (int c = 0; c < BMP_CHANNELS; c++) {
                 unsigned char post_threshold_value;
 
-                if (input_image[i][j][0] > 90) {
+                if (input_image[i][j][0] > threshold) {
                     post_threshold_value = 255;
                 } else {
                     post_threshold_value = 0;
                 }
+                output_image[i][j][c] = post_threshold_value;
             }
         }
     }
+}
+
+//Function that erodes image (basic) Step 4
+void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
+    // Implementer senere
 }

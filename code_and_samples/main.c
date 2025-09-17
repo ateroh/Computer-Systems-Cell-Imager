@@ -1,4 +1,5 @@
-//To compile (linux/mac): gcc cbmp.c main.c -o main.out -std=c99
+//To compile (linux/mac): gcc cbmp.c main.c -o main.out -std=c99 gcc cbmp.c main.c functions.c -o main.out -std=c99
+
 //To run (linux/mac): ./main.out example.bmp example_inv.bmp
 
 //To compile (win): gcc cbmp.c main.c -o main.exe -std=c99
@@ -8,8 +9,15 @@
 #include <stdio.h>
 #include "cbmp.h"
 #include "functions.h"
-#include "functions.c"
-  
+
+#define THRESHOLD 90
+
+// Globale billede-arrays
+unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+
+
+
 //Main function
 int main(int argc, char** argv)
 {
@@ -36,7 +44,7 @@ printf("|---------------------------|\n");
 printf("Loaded image!\n");
 
   //Run inversion
-  invert(input_image,output_image);
+  // invert(input_image,output_image);
 
 printf("Inverted image!\n");
 
@@ -45,9 +53,10 @@ printf("Inverted image!\n");
 printf("Converted to greyscale!\n");
   
   //Save image to file
-  write_bitmap(output_image, argv[2]);
+  // write_bitmap(output_image, argv[2]);
 printf("Saved image!\n");
 
+   binary_threshold(THRESHOLD, input_image, output_image);
 
   printf("Done!\n");
   return 0;
