@@ -24,7 +24,7 @@ unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 int main(int argc, char** argv)
 {
 
-clock_t start, end;
+  clock_t start, end;
 
   //argc counts how may arguments are passed
   //argv[0] is a string with the name of the program
@@ -42,8 +42,8 @@ clock_t start, end;
   printf("|---------------------------|\n");
 
   //printf("Example program - 02132 - A1\n");
-// Start timer
-start = clock();
+  // Start timer
+  start = clock();
 
 
   //Load image from file
@@ -72,11 +72,11 @@ start = clock();
   printf("Done!\n");
 
 
-// Udregner tid brugt fra CPU https://stackoverflow.com/questions/5248915/execution-time-of-c-program
+  // Udregner tid brugt fra CPU https://stackoverflow.com/questions/5248915/execution-time-of-c-program
 
-end = clock();
-double time_spent = ((double) (end - start)) / CLOCKS_PER_SEC;
+  end = clock();
+  double time_spent = ((double) (end - start)) / CLOCKS_PER_SEC;
 
-printf("Time used: %f seconds\n", time_spent);
+  printf("Time used: %f seconds\n", time_spent);
   return 0;
 }

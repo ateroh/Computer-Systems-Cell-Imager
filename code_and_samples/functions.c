@@ -52,6 +52,10 @@ void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HE
 }
 
 //Function that erodes image (basic) Step 4
-void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
-    // Implementer senere
+void basic_erosion(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
+    binary_threshold(threshold, input_image, output_image);
+
+    int eroded_cells;
+
+    
 }
