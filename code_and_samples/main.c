@@ -3,6 +3,7 @@
 //To run (linux/mac): ./main.out example.bmp example_inv.bmp
 
 //To compile (win): gcc cbmp.c main.c -o main.exe -std=c99
+//TO compile (win) for newer: gcc cbmp.c main.c functions.c -o main.exe -std=c99
 //To run (win): main.exe example.bmp example_inv.bmp
 
 #include <stdlib.h>
@@ -32,31 +33,34 @@ int main(int argc, char** argv)
       fprintf(stderr, "Usage: %s <output file path> <output file path>\n", argv[0]);
       exit(1);
   }
-printf("#---------------------------#\n");
-printf("|   Cell Detection Program  |\n");
-printf("|---------------------------|\n");
+  printf("#---------------------------#\n");
+  printf("|   Cell Detection Program  |\n");
+  printf("|---------------------------|\n");
 
   //printf("Example program - 02132 - A1\n");
 
   //Load image from file
   read_bitmap(argv[1], input_image);
 
-printf("Loaded image!\n");
+  printf("Loaded image!\n");
 
   //Run inversion
   // invert(input_image,output_image);
 
-printf("Inverted image!\n");
+  //printf("Inverted image!\n");
 
-  // bro wtf
-   // convert_to_greyscale(input_image, output_image);
-printf("Converted to greyscale!\n");
+  
+  // convert_to_greyscale(input_image, output_image);
+  //printf("Converted to greyscale!\n");
+  
+
+  binary_threshold(THRESHOLD, input_image, output_image);
   
   //Save image to file
-  // write_bitmap(output_image, argv[2]);
-printf("Saved image!\n");
+  write_bitmap(output_image, argv[2]);
+  //printf("Saved image!\n");
 
-   binary_threshold(THRESHOLD, input_image, output_image);
+  
 
   printf("Done!\n");
   return 0;
