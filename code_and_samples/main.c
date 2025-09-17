@@ -6,7 +6,7 @@
 //TO compile (win) for newer: gcc cbmp.c main.c functions.c -o main.exe -std=c99
 //To compile (win): gcc cbmp.c main.c functions.c -o main.exe -std=c99
 //To run (win): .\main.exe example.bmp example_inv.bmp
-
+#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "cbmp.h"
@@ -23,6 +23,10 @@ unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 //Main function
 int main(int argc, char** argv)
 {
+
+clock_t start, end;
+double cpu_time_used;
+
   //argc counts how may arguments are passed
   //argv[0] is a string with the name of the program
   //argv[1] is the first command line argument (input image)
@@ -39,6 +43,9 @@ int main(int argc, char** argv)
   printf("|---------------------------|\n");
 
   //printf("Example program - 02132 - A1\n");
+// Start timer
+start = clock();
+
 
   //Load image from file
   read_bitmap(argv[1], input_image);
@@ -64,5 +71,8 @@ int main(int argc, char** argv)
   
 
   printf("Done!\n");
+end = clock();
+cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+printf("Time used: %f seconds\n", cpu_time_used);
   return 0;
 }
