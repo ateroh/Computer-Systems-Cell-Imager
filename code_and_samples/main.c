@@ -1,5 +1,8 @@
 //To compile (linux/mac): gcc cbmp.c main.c functions.c -o main.out -std=c99
 
+// gcc -fsanitize=address -g cbmp.c main.c functions.c -o memory_test -std=c99
+
+
 //To run (linux/mac): ./main.out example.bmp example_inv.bmp
 
 //To compile (win): gcc cbmp.c main.c -o main.exe -std=c99
@@ -62,9 +65,6 @@ int main(int argc, char** argv)
   
 
   binary_threshold(THRESHOLD, input_image, output_image);
-
- int spots = detect_spots(input_image);
-printf("Number of spots: %d\n", spots);
 
 
   //Save image to file

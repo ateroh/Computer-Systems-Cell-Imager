@@ -85,9 +85,10 @@ void basic_erosion(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGT
                     }
                 }
             }
-
     }
-    
+}
 
+// Step 5 detect spots in image
 
+int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
 }
