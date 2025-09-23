@@ -118,7 +118,9 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
 
             // Øverste og nederste ramme for Exclusion frame
             for (int dx = -exclusion_frame; dx <= exclusion_frame && ring_is_black; dx++ ) {
-                if (input_image[x + dx][y - exclusion_frame][2] == 255) ring_is_black = 0;
+                if (input_image[x + dx][y - exclusion_frame][2] == 255 || input_image[x + dx][y + exclusion_frame][2]) {
+                    ring_is_black = 0;
+                    break;
             }
             // Venstre og højre ramme af exclusion frame
             for (int dy = -exclusion_frame; dy <= exclusion_frame && ring_is_black; dy++ ) {
