@@ -79,22 +79,24 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
             }
         }
 
-
         for (int x = 1; x < BMP_WIDTH - 1; x++) {
             // we go from 1 to width-1 to avoid borders
             for (int y = 1; y < BMP_HEIGTH - 1; y++) {
-                if (temp_image[x][y][2] == 255
-                    && temp_image[x - 1][y][2] == 255
-                    && temp_image[x + 1][y][2] == 255
-                    && temp_image[x][y - 1][2] == 255
-                    && temp_image[x][y + 1][2] == 255) {
-                    // checks all orthogonally adjacent cell to see if they are also white. If so, do nothing (keep alive)
-                    
-                } else {
-                    for (int c = 0; c < BMP_CHANNELS; c++) {
-                        output_image[x][y][c] = 0;
+                if (temp_image[x][y][2] == 255) {
+                    // Center was white: erode unless all 4-neighbors are also white
+                    if (temp_image[x - 1][y][2] == 255
+                        && temp_image[x + 1][y][2] == 255
+                        && temp_image[x][y - 1][2] == 255
+                        && temp_image[x][y + 1][2] == 255) {
+                        // keep white (no write needed since output already holds current state)
+                    } else {
+                        for (int c = 0; c < BMP_CHANNELS; c++) {
+                            output_image[x][y][c] = 0;
+                        }
+                        eroded_cells = 1; // a white pixel was eroded
                     }
-                    eroded_cells = 1; // cells were eroded
+                } else {
+                    // Center already black: leave as is and do NOT set eroded_cells
                 }
             }
         }
