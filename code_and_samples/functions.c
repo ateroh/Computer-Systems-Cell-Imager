@@ -67,9 +67,19 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
             }
         }
     }
-
     while (eroded_cells) {
         eroded_cells = 0; // incase of only one erosion needed
+
+
+        for (int x = 0; x < BMP_WIDTH; x++) {
+            for (int y = 0; y < BMP_HEIGTH; y++) {
+                for (int c = 0; c < BMP_CHANNELS; c++) {
+                    temp_image[x][y][c] = output_image[x][y][c];
+                }
+            }
+        }
+
+
         for (int x = 1; x < BMP_WIDTH - 1; x++) {
             // we go from 1 to width-1 to avoid borders
             for (int y = 1; y < BMP_HEIGTH - 1; y++) {
@@ -79,6 +89,7 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
                     && temp_image[x][y - 1][2] == 255
                     && temp_image[x][y + 1][2] == 255) {
                     // checks all orthogonally adjacent cell to see if they are also white. If so, do nothing (keep alive)
+                    
                 } else {
                     for (int c = 0; c < BMP_CHANNELS; c++) {
                         output_image[x][y][c] = 0;
