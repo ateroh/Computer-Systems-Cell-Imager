@@ -16,7 +16,9 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
         }
     }
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                         STEP 2: Convert to gray-scale                          //
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // Function to convert an image to greyscale Step 2
 void convert_to_greyscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                           unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
@@ -31,6 +33,10 @@ void convert_to_greyscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_C
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                         STEP 3: Apply binary threshold                         //
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Function to threshold an image Step 3
 void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
@@ -51,6 +57,9 @@ void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HE
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                         STEP 4: Erode image                                     //
+////////////////////////////////////////////////////////////////////////////////////////////////////
 //Function that erodes image (basic) Step 4
 void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                    unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
@@ -103,8 +112,9 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
     }
 }
 
-// Step 5 detect spots in image
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                         STEP 5: DETECT SPOTS                                    //
+////////////////////////////////////////////////////////////////////////////////////////////////////
 int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
     // Konstanter for vinduet
     const int capture = 6; // halv størrelse for 12x12 (capture)
@@ -163,3 +173,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
     }
     return detections;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                         STEP 6: Generate output image                          //
+////////////////////////////////////////////////////////////////////////////////////////////////////
