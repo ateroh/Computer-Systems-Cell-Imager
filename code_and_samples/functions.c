@@ -92,19 +92,19 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
 
 int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
     // Konstanter for vinduet
-    const int window  = 6;              // halv størrelse for 12x12 (capture)
-    const int window_out = window + 1;       // +1 pixel ring (exclusion frame)
+    const int capture  = 6;              // halv størrelse for 12x12 (capture)
+    const int exclusion_frame = capture + 1;       // +1 pixel ring (exclusion frame)
 
     int detections = 0;
 
     // Loop kun hvor hele 14x14 (R_OUT*2) er inde i billedet
-    for (int x = window_out; x < BMP_WIDTH - window_out; x++) {
-        for (int y = window_out; y < BMP_HEIGTH - window_out; y++) {
+    for (int x = exclusion_frame; x < BMP_WIDTH - exclusion_frame; x++) {
+        for (int y = exclusion_frame; y < BMP_HEIGTH - exclusion_frame; y++) {
 
             // 1) Find mindst én hvid pixel i 12x12 capture-området
             int has_white_in_capture = 0;
-            for (int dx = -window; dx <= window - 1 && !has_white_in_capture; dx++) {
-                for (int dy = -window; dy <= window - 1; dy++) {
+            for (int dx = -capture; dx <= capture - 1 && !has_white_in_capture; dx++) {
+                for (int dy = -capture; dy <= capture - 1; dy++) {
                     if (input_image[x + dx][y + dy][2] == 255) {
                         has_white_in_capture = 1;
                         break;
@@ -114,4 +114,6 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
             if (!has_white_in_capture) {
                 continue; // intet at fange omkring dette center
             }
+
+            int ring_is_black = 1;
 
