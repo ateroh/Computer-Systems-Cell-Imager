@@ -66,6 +66,9 @@ int main(int argc, char** argv)
 
   basic_erosion(input_image, output_image);
 
+  int cells = detect_spots(output_image);
+
+    printf("Antal celler: %d\n", cells);
 
   //Save image to file
   write_bitmap(output_image, argv[2]);
