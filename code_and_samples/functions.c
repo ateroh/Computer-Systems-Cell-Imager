@@ -59,7 +59,6 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
     int eroded_cells = 1;
     unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 
-    //Creating a temporaray 3d array so that we can run multiple erosions
     for (int x = 0; x < BMP_WIDTH; x++) {
         for (int y = 0; y < BMP_HEIGTH; y++) {
             for (int c = 0; c < BMP_CHANNELS; c++) {
@@ -68,7 +67,7 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
         }
     }
     while (eroded_cells) {
-        eroded_cells = 0; // incase of only one erosion needed
+        eroded_cells = 0; // incase of only one erosion occurs
 
 
         for (int x = 0; x < BMP_WIDTH; x++) {
@@ -83,20 +82,20 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
             // we go from 1 to width-1 to avoid borders
             for (int y = 1; y < BMP_HEIGTH - 1; y++) {
                 if (temp_image[x][y][2] == 255) {
-                    // Center was white: erode unless all 4-neighbors are also white
+                    //if the center is white we continue
                     if (temp_image[x - 1][y][2] == 255
                         && temp_image[x + 1][y][2] == 255
                         && temp_image[x][y - 1][2] == 255
                         && temp_image[x][y + 1][2] == 255) {
-                        // keep white (no write needed since output already holds current state)
+                        // keep white (do nothing to output)
                     } else {
                         for (int c = 0; c < BMP_CHANNELS; c++) {
                             output_image[x][y][c] = 0;
                         }
-                        eroded_cells = 1; // a white pixel was eroded
+                        eroded_cells = 1; //erosion occured
                     }
                 } else {
-                    // Center already black: leave as is and do NOT set eroded_cells
+                    // else if the center is black we leave it. do nothing again
                 }
             }
         }
