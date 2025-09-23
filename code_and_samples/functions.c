@@ -100,7 +100,6 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
     // Loop kun hvor hele 14x14 (Exclusion frame) er inde i billedet
     for (int x = exclusion_frame; x < BMP_WIDTH - exclusion_frame; x++) {
         for (int y = exclusion_frame; y < BMP_HEIGTH - exclusion_frame; y++) {
-
             // 1) Find mindst én hvid pixel i 12x12 capture-området
             int has_white_in_capture = 0;
             for (int dx = -capture; dx <= capture - 1 && !has_white_in_capture; dx++) {
@@ -117,3 +116,32 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
 
             int ring_is_black = 1;
 
+            // Øverste og nederste ramme for Exclusion frame
+            for (int dx = -exclusion_frame; dx <= exclusion_frame && ring_is_black; dx++ ) {
+                if (input_image[x + dx][y - exclusion_frame][2] == 255) ring_is_black = 0;
+            }
+            // Venstre og højre ramme af exclusion frame
+            for (int dy = -exclusion_frame; dy <= exclusion_frame && ring_is_black; dy++ ) {
+                if (input_image[x - exclusion_frame][y + dy][2] == 255
+                    || input_image[x + exclusion_frame][y + dy][2] == 255) {
+                    ring_is_black = 0;
+                    break;
+                }
+            }
+            if (!ring_is_black) {
+                continue; // intet at fange omkring dette center
+            }
+            // Registrer detektion og sætter 12x12 til sort
+            detections++;
+
+            for (int dx = -capture; dx <= capture - 1; dx++) {
+                for (int dy = -capture; dy <= capture - 1; dy++) {
+                    for (int c = 0; c < BMP_CHANNELS; c++) {
+                        input_image[x + dx][y + dy][c] = 0;
+                    }
+                }
+            }
+        }
+    }
+    return detections;
+}

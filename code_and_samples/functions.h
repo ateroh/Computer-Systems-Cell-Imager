@@ -15,5 +15,5 @@ void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HE
 void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]);
 
 
-//int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]);
+int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]);
 #endif // FUNCTIONS_H
