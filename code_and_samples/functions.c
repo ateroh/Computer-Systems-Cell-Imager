@@ -97,7 +97,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
 
     int detections = 0;
 
-    // Loop kun hvor hele 14x14 (R_OUT*2) er inde i billedet
+    // Loop kun hvor hele 14x14 (Exclusion frame) er inde i billedet
     for (int x = exclusion_frame; x < BMP_WIDTH - exclusion_frame; x++) {
         for (int y = exclusion_frame; y < BMP_HEIGTH - exclusion_frame; y++) {
 
