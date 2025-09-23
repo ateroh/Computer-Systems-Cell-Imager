@@ -52,8 +52,8 @@ void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HE
 }
 
 //Function that erodes image (basic) Step 4
-void basic_erosion(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
-    binary_threshold(threshold, input_image, output_image);
+void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
+    binary_threshold(THRESHOLD, input_image, output_image); 
 
     int eroded_cells = 1;
     unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
@@ -66,7 +66,8 @@ void basic_erosion(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGT
             }
         }   
     }
-    while (eroded_cells) {
+
+    while (eroded_cells) {  
         eroded_cells = 0; // incase of only one erosion needed
         for (int x = 1; x < BMP_WIDTH-1; x++) {         // we go from 1 to width-1 to avoid borders 
             for (int y = 1; y < BMP_HEIGTH-1; y++) {
@@ -79,7 +80,6 @@ void basic_erosion(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGT
                 } else {
                     for (int c = 0; c < BMP_CHANNELS; c++) {
                         output_image[x][y][c] = 0;   
-
                         }
                         eroded_cells = 1;   // cells were eroded
                     }
@@ -92,3 +92,4 @@ void basic_erosion(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGT
 
 int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
 }
+
