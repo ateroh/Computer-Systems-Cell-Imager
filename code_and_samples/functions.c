@@ -121,29 +121,30 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
                 if (input_image[x + dx][y - exclusion_frame][2] == 255 || input_image[x + dx][y + exclusion_frame][2]) {
                     ring_is_black = 0;
                     break;
-            }
-            // Venstre og højre ramme af exclusion frame
-            for (int dy = -exclusion_frame; dy <= exclusion_frame && ring_is_black; dy++ ) {
-                if (input_image[x - exclusion_frame][y + dy][2] == 255
-                    || input_image[x + exclusion_frame][y + dy][2] == 255) {
-                    ring_is_black = 0;
-                    break;
                 }
-            }
-            if (!ring_is_black) {
-                continue; // intet at fange omkring dette center
-            }
-            // Registrer detektion og sætter 12x12 til sort
-            detections++;
+                // Venstre og højre ramme af exclusion frame
+                for (int dy = -exclusion_frame; dy <= exclusion_frame && ring_is_black; dy++ ) {
+                    if (input_image[x - exclusion_frame][y + dy][2] == 255
+                        || input_image[x + exclusion_frame][y + dy][2] == 255) {
+                        ring_is_black = 0;
+                        break;
+                        }
+                }
+                if (!ring_is_black) {
+                    continue; // intet at fange omkring dette center
+                }
+                // Registrer detektion og sætter 12x12 til sort
+                detections++;
 
-            for (int dx = -capture; dx <= capture - 1; dx++) {
-                for (int dy = -capture; dy <= capture - 1; dy++) {
-                    for (int c = 0; c < BMP_CHANNELS; c++) {
-                        input_image[x + dx][y + dy][c] = 0;
+                for (int dx = -capture; dx <= capture - 1; dx++) {
+                    for (int dy = -capture; dy <= capture - 1; dy++) {
+                        for (int c = 0; c < BMP_CHANNELS; c++) {
+                            input_image[x + dx][y + dy][c] = 0;
+                        }
                     }
                 }
             }
         }
+        return detections;
     }
-    return detections;
 }
