@@ -75,6 +75,8 @@ int main(int argc, char** argv)
   }
 
 
+    generate_output_image(input_image, output_image, cells, coordinate_x, coordinate_y);
+
   //Save image to file
   write_bitmap(output_image, argv[2]);
   printf("Saved image!\n");

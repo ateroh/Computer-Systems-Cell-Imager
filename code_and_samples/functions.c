@@ -180,3 +180,48 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                         STEP 6: Generate output image                          //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+void generate_output_image(
+    unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
+    unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
+    int detections,
+    int coordinate_x[],
+    int coordinate_y[]) {
+
+    int cross_length = 10;
+
+    // Kopier originalt billede
+    for (int x = 0; x < BMP_WIDTH; x++) {
+        for (int y = 0; y< BMP_HEIGTH; y++) {
+            for (int c = 0; c < BMP_CHANNELS; c++) {
+                output_image[x][y][c] = input_image[x][y][c];
+            }
+        }
+    }
+        // Tegn et rødt kryds i centeret af hver fundne celle
+
+        for (int i = 0; i < detections; i++) {
+            int cx = coordinate_x[i];
+            int cy = coordinate_y[i];
+
+            // Horizontal
+            for (int dx = -cross_length; dx <= cross_length; dx++) {
+                int x = cx + dx;
+                int y = cy;
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    output_image[x][y][0] = 255;
+                    output_image[x][y][1] = 0;
+                    output_image[x][y][2] = 0;
+                }
+            }
+            // Vertical
+            for (int dy = -cross_length; dy <= cross_length; dy++) {
+                int x = cx;
+                int y = cy + dy;
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    output_image[x][y][0] = 255;
+                    output_image[x][y][1] = 0;
+                    output_image[x][y][2] = 0;
+                }
+            }
+        }
+}
