@@ -16,6 +16,7 @@
 #include "functions.h"
 
 #define THRESHOLD 90
+#define MAX_CELLS 350
 
 // Globale billede-arrays
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
@@ -26,7 +27,8 @@ unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 //Main function
 int main(int argc, char** argv)
 {
-
+  int coordinate_x[MAX_CELLS];
+  int coordinate_y[MAX_CELLS];
   clock_t start, end;
 
   //argc counts how may arguments are passed
@@ -55,19 +57,23 @@ int main(int argc, char** argv)
   printf("Loaded image!\n");
 
   //Run inversion
-   invert(input_image,output_image);
+  //invert(input_image,output_image);
 
   printf("Inverted image!\n");
 
   
-     convert_to_greyscale(input_image, output_image);
-   printf("Converted to greyscale!\n");
-   binary_threshold(THRESHOLD, input_image, output_image);
+  //convert_to_greyscale(input_image, output_image);
+  printf("Converted to greyscale!\n");
+  //binary_threshold(THRESHOLD, input_image, output_image);
 
-    int cells = basic_erosion(input_image, output_image);
-printf("Image eroded!\n");
+  int cells = basic_erosion(input_image, output_image, coordinate_x, coordinate_y);
+  printf("Image eroded!\n");
 
-    printf("Antal celler: %d\n", cells);
+  printf("Antal celler: %d\n", cells);
+  for (int i = 0; i < cells && i < MAX_CELLS; i++) {
+    printf("Cell %d: (%d, %d)\n", i + 1, coordinate_x[i], coordinate_y[i]);
+  }
+
 
   //Save image to file
   write_bitmap(output_image, argv[2]);
