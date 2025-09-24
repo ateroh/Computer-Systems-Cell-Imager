@@ -55,19 +55,17 @@ int main(int argc, char** argv)
   printf("Loaded image!\n");
 
   //Run inversion
-  invert(input_image,output_image);
+   invert(input_image,output_image);
 
-  //printf("Inverted image!\n");
+  printf("Inverted image!\n");
 
   
-   //convert_to_greyscale(input_image, output_image);
-  //printf("Converted to greyscale!\n");
-  // binary_threshold(THRESHOLD, input_image, output_image);
+     convert_to_greyscale(input_image, output_image);
+   printf("Converted to greyscale!\n");
+   binary_threshold(THRESHOLD, input_image, output_image);
 
-  basic_erosion(input_image, output_image);
+    int cells = basic_erosion(input_image, output_image);
 printf("Image eroded!\n");
-
-  int cells = detect_spots(output_image);
 
     printf("Antal celler: %d\n", cells);
 

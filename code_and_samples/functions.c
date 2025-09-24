@@ -4,6 +4,7 @@
 
 
 #define THRESHOLD 90
+#define MIN_CAPTURE_WHITES 14
 
 //Function to invert pixels of an image (negative)
 void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
@@ -16,9 +17,7 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
         }
     }
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                         STEP 2: Convert to gray-scale                          //
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Function to convert an image to greyscale Step 2
 void convert_to_greyscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                           unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
@@ -34,9 +33,7 @@ void convert_to_greyscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_C
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                         STEP 3: Apply binary threshold                         //
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 // Function to threshold an image Step 3
 void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
@@ -57,15 +54,15 @@ void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HE
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                         STEP 4: Erode image                                     //
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //Function that erodes image (basic) Step 4
-void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
+int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                    unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
     binary_threshold(THRESHOLD, input_image, output_image);
 
+    int total_detections = 0;
     int eroded_cells = 1;
+
     unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 
     for (int x = 0; x < BMP_WIDTH; x++) {
@@ -103,12 +100,14 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
                         }
                         eroded_cells = 1; //erosion occured
                     }
-                } else {
-                    // else if the center is black we leave it. do nothing again
                 }
             }
         }
+        total_detections += detect_spots(output_image);
     }
+    total_detections += detect_spots(output_image);
+
+    return total_detections;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,33 +115,38 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
     // Konstanter for vinduet
-    const int capture = 6; // halv størrelse for 12x12 (capture)
-    const int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
+     int capture = 6; // halv størrelse for 12x12 (capture)
+     int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
 
     int detections = 0;
 
     // Loop kun hvor hele 14x14 (Exclusion frame) er inde i billedet
     for (int x = exclusion_frame; x < BMP_WIDTH - exclusion_frame; x++) {
         for (int y = exclusion_frame; y < BMP_HEIGTH - exclusion_frame; y++) {
-            // 1) Find mindst én hvid pixel i 12x12 capture-området
-            int has_white_in_capture = 0;
-            for (int dx = -capture; dx <= capture - 1 && !has_white_in_capture; dx++) {
+            // Kræv at center-pixel er hvid for at undgå at tælle støjlige nabopixels
+            if (input_image[x][y][2] != 255) {
+                continue;
+            }
+
+            // 1) Tæl hvide pixels i 12x12 capture-området
+            int white_count = 0;
+            for (int dx = -capture; dx <= capture - 1; dx++) {
                 for (int dy = -capture; dy <= capture - 1; dy++) {
                     if (input_image[x + dx][y + dy][2] == 255) {
-                        has_white_in_capture = 1;
-                        break;
+                        white_count++;
                     }
                 }
             }
-            if (!has_white_in_capture) {
-                continue; // intet at fange omkring dette center
+            if (white_count < MIN_CAPTURE_WHITES) {
+                continue; // for få hvide pixels -> sandsynligvis støj
             }
 
             int ring_is_black = 1;
 
             // Øverste og nederste ramme for Exclusion frame
             for (int dx = -exclusion_frame; dx <= exclusion_frame && ring_is_black; dx++) {
-                if (input_image[x + dx][y - exclusion_frame][2] == 255 || input_image[x + dx][y + exclusion_frame][2]) {
+                if (input_image[x + dx][y - exclusion_frame][2] == 255
+                    || input_image[x + dx][y + exclusion_frame][2] == 255 )  {
                     ring_is_black = 0;
                     break;
                 }
