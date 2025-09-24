@@ -104,18 +104,18 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
                 }
             }
         }
-        total_detections += detect_spots(output_image, coordinate_x, coordinate_y);
+        total_detections += detect_spots(output_image, coordinate_x, coordinate_y, total_detections);
     }
     return total_detections;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                         STEP 5: DETECT SPOTS                                    //
+//                                         STEP 5: DETECT SPOTS                                   //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[]) {
+int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[], int total_detections) {
     // Konstanter for vinduet
-     int capture = 6; // halv størrelse for 12x12 (capture)
-     int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
+    int capture = 6; // halv størrelse for 12x12 (capture)
+    int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
     int detections = 0;
 
     // Loop kun hvor hele 14x14 (Exclusion frame) er inde i billedet
@@ -161,8 +161,8 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                 continue; // intet at fange omkring dette center
             }
             // Registrer detektion og sætter 12x12 til sort
-            coordinate_x[detections] = x;
-            coordinate_y[detections] = y;
+            coordinate_x[total_detections + detections] = x;
+            coordinate_y[total_detections + detections] = y;
             detections++;
 
             for (int dx = -capture; dx <= capture - 1; dx++) {
