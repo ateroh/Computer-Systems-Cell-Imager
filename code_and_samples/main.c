@@ -16,18 +16,21 @@
 #include "functions.h"
 
 #define THRESHOLD 90
+#define MAX_CELLS 1000
 
 // Globale billede-arrays
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 
+int coordinate_x[MAX_CELLS];
+int coordinate_y[MAX_CELLS];
 
 
 //Main function
 int main(int argc, char** argv)
 {
 
-  clock_t start, end;
+  
 
   //argc counts how may arguments are passed
   //argv[0] is a string with the name of the program
@@ -45,8 +48,6 @@ int main(int argc, char** argv)
   printf("|---------------------------|\n");
 
   //printf("Example program - 02132 - A1\n");
-  // Start timer
-  start = clock();
 
 
   //Load image from file
@@ -55,21 +56,18 @@ int main(int argc, char** argv)
   printf("Loaded image!\n");
 
   //Run inversion
-  invert(input_image,output_image);
+  //invert(input_image,output_image);
 
   //printf("Inverted image!\n");
 
   
-   //convert_to_greyscale(input_image, output_image);
+  //convert_to_greyscale(input_image, output_image);
   //printf("Converted to greyscale!\n");
   // binary_threshold(THRESHOLD, input_image, output_image);
+  printf("tesaeiugwudya");
+  basic_erosion(input_image, output_image, coordinate_x, coordinate_y);
+  printf("Image eroded!\n");
 
-  basic_erosion(input_image, output_image);
-printf("Image eroded!\n");
-
-  int cells = detect_spots(output_image);
-
-    printf("Antal celler: %d\n", cells);
 
   //Save image to file
   write_bitmap(output_image, argv[2]);
@@ -80,10 +78,5 @@ printf("Image eroded!\n");
 
 
   // Udregner tid brugt fra CPU https://stackoverflow.com/questions/5248915/execution-time-of-c-program
-
-  end = clock();
-  double time_spent = ((double) (end - start)) / CLOCKS_PER_SEC;
-
-  printf("Time used: %f seconds\n", time_spent);
   return 0;
 }

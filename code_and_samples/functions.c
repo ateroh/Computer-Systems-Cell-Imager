@@ -4,6 +4,8 @@
 
 
 #define THRESHOLD 90
+#define MAX_CELLS 1000
+
 
 //Function to invert pixels of an image (negative)
 void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
@@ -53,7 +55,8 @@ void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HE
 
 //Function that erodes image (basic) Step 4
 void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
-                   unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
+                   unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], 
+                   int coordinate_x[], int coordinate_y[]) {
     binary_threshold(THRESHOLD, input_image, output_image);
 
     int eroded_cells = 1;
@@ -66,6 +69,8 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
             }
         }
     }
+
+
     while (eroded_cells) {
         eroded_cells = 0; // incase of only one erosion occurs
 
@@ -77,6 +82,11 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
                 }
             }
         }
+
+        // Perform detect cells on each iteration
+        // Detect cells on temp_image
+        int detections = detect_spots(temp_image, coordinate_x, coordinate_y);
+        printf("Erosion count: %d cells detected", detections);
 
         for (int x = 1; x < BMP_WIDTH - 1; x++) {
             // we go from 1 to width-1 to avoid borders
@@ -104,7 +114,7 @@ void basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
 
 // Step 5 detect spots in image
 
-int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
+int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[]) {
     // Konstanter for vinduet
     const int capture = 6; // halv størrelse for 12x12 (capture)
     const int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
@@ -132,7 +142,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
 
             // Øverste og nederste ramme for Exclusion frame
             for (int dx = -exclusion_frame; dx <= exclusion_frame && ring_is_black; dx++) {
-                if (input_image[x + dx][y - exclusion_frame][2] == 255 || input_image[x + dx][y + exclusion_frame][2]) {
+                if (input_image[x + dx][y - exclusion_frame][2] == 255 || input_image[x + dx][y + exclusion_frame][2] == 255) {
                     ring_is_black = 0;
                     break;
                 }
@@ -148,9 +158,13 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
             if (!ring_is_black) {
                 continue; // intet at fange omkring dette center
             }
-            // Registrer detektion og sætter 12x12 til sort
+            
+            if (detections < MAX_CELLS) {
+                coordinate_x[detections] = x;
+                coordinate_y[detections] = y;
+            }
             detections++;
-
+            // Registrer detektion og sætter 12x12 til sort
             for (int dx = -capture; dx <= capture - 1; dx++) {
                 for (int dy = -capture; dy <= capture - 1; dy++) {
                     for (int c = 0; c < BMP_CHANNELS; c++) {
