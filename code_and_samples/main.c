@@ -16,7 +16,7 @@
 #include "functions.h"
 
 #define THRESHOLD 90
-#define MAX_CELLS 299
+#define MAX_CELLS 1000
 
 // Globale billede-arrays
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
   printf("Converted to greyscale!\n");
   //binary_threshold(THRESHOLD, input_image, output_image);
 
-  int cells = basic_erosion(input_image, output_image, coordinate_x, coordinate_y);
+  int cells = basic_erosion(input_image, output_image, coordinate_x, coordinate_y, MAX_CELLS);
   printf("Image eroded!\n");
 
   printf("Antal celler: %d\n", cells);
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
   }
 
 
-    generate_output_image(input_image, output_image, cells, coordinate_x, coordinate_y);
+  generate_output_image(input_image, output_image, cells, coordinate_x, coordinate_y);
 
   //Save image to file
   write_bitmap(output_image, argv[2]);

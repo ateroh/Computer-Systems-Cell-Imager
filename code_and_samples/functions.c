@@ -4,7 +4,7 @@
 
 
 #define THRESHOLD 90
-#define MIN_CAPTURE_WHITES 14
+#define MIN_CAPTURE_WHITES 5
 
 unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 
@@ -60,12 +60,13 @@ void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HE
 //Function that erodes image (basic) Step 4
 int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                    unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], 
-                   int coordinate_x[], int coordinate_y[]) {
+                   int coordinate_x[], int coordinate_y[], int capacity) {
     binary_threshold(THRESHOLD, input_image, output_image);
+    
 
     int total_detections = 0;
     int eroded_cells = 1;
-
+    /*
     for (int x = 0; x < BMP_WIDTH; x++) {
         for (int y = 0; y < BMP_HEIGTH; y++) {
             for (int c = 0; c < BMP_CHANNELS; c++) {
@@ -73,6 +74,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
             }
         }
     }
+    */
     while (eroded_cells) {
         eroded_cells = 0; // incase of only one erosion occurs
 
@@ -104,7 +106,11 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
                 }
             }
         }
-        total_detections += detect_spots(output_image, coordinate_x, coordinate_y, total_detections);
+        if (total_detections > capacity) {
+            total_detections = capacity;
+        } else {
+        total_detections += detect_spots(output_image, coordinate_x, coordinate_y, total_detections, capacity);
+        }
     }
     return total_detections;
 }
@@ -112,21 +118,25 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                         STEP 5: DETECT SPOTS                                   //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[], int total_detections) {
+int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[], int total_detections, int capacity) {
     // Konstanter for vinduet
     int capture = 6; // halv størrelse for 12x12 (capture)
     int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
     int detections = 0;
 
+    if (total_detections >= capacity) return 0;
+
     // Loop kun hvor hele 14x14 (Exclusion frame) er inde i billedet
     for (int x = exclusion_frame; x < BMP_WIDTH - exclusion_frame; x++) {
         for (int y = exclusion_frame; y < BMP_HEIGTH - exclusion_frame; y++) {
+            
             // Kræv at center-pixel er hvid for at undgå at tælle støjlige nabopixels
-            if (input_image[x][y][2] != 255) {
-                continue;
-            }
+            if (input_image[x][y][2] != 255) continue;
 
-            // 1) Tæl hvide pixels i 12x12 capture-området
+
+            /*      tester lige uden min_capture_whites
+
+            //  Tæl hvide pixels i 12x12 capture-området
             int white_count = 0;
             for (int dx = -capture; dx <= capture - 1; dx++) {
                 for (int dy = -capture; dy <= capture - 1; dy++) {
@@ -138,6 +148,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             if (white_count < MIN_CAPTURE_WHITES) {
                 continue; // for få hvide pixels -> sandsynligvis støj
             }
+            */
 
             int ring_is_black = 1;
 
@@ -157,16 +168,30 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                     break;
                 }
             }
-            if (!ring_is_black) {
+            if (ring_is_black == 0) {
                 continue; // intet at fange omkring dette center
             }
+
+            if (total_detections + detections >= capacity) return detections;
+
             // Registrer detektion og sætter 12x12 til sort
             coordinate_x[total_detections + detections] = x;
             coordinate_y[total_detections + detections] = y;
             detections++;
 
+
+            /*  Giver 587 celler i easy7
             for (int dx = -capture; dx <= capture - 1; dx++) {
                 for (int dy = -capture; dy <= capture - 1; dy++) {
+                    for (int c = 0; c < BMP_CHANNELS; c++) {
+                        input_image[x + dx][y + dy][c] = 0;
+                    }
+                }
+            }
+            */
+            // giver 288 celler i easy7
+            for (int dx = -exclusion_frame; dx <= exclusion_frame; dx++) {
+                for (int dy = -exclusion_frame; dy <= exclusion_frame; dy++) {
                     for (int c = 0; c < BMP_CHANNELS; c++) {
                         input_image[x + dx][y + dy][c] = 0;
                     }
