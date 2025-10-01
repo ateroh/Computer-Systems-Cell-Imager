@@ -3,7 +3,7 @@
 # include "functions.h"
 
 
-#define THRESHOLD 120
+#define THRESHOLD 90
 #define MIN_CAPTURE_WHITES 5
 
 unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];

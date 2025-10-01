@@ -74,7 +74,6 @@ int main(int argc, char** argv)
     printf("Cell %d: (%d, %d)\n", i + 1, coordinate_x[i], coordinate_y[i]);
   }
 
-
   generate_output_image(input_image, output_image, cells, coordinate_x, coordinate_y);
 
   //Save image to file
