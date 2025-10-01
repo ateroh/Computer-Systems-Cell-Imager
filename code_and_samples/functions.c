@@ -4,7 +4,6 @@
 
 
 #define THRESHOLD 90
-#define MIN_CAPTURE_WHITES 5
 
 unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 
@@ -195,16 +194,6 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             coordinate_y[total_detections + detections] = y;
             detections++;
 
-
-            /*  Giver 587 celler i easy7
-            for (int dx = -capture; dx <= capture - 1; dx++) {
-                for (int dy = -capture; dy <= capture - 1; dy++) {
-                    for (int c = 0; c < BMP_CHANNELS; c++) {
-                        input_image[x + dx][y + dy][c] = 0;
-                    }
-                }
-            }
-            */
             // giver 288 celler i easy7
             for (int dx = -exclusion_frame; dx <= exclusion_frame; dx++) {
                 for (int dy = -exclusion_frame; dy <= exclusion_frame; dy++) {

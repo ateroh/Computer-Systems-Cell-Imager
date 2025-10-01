@@ -65,7 +65,7 @@ int main(int argc, char** argv)
   //convert_to_greyscale(input_image, output_image);
   printf("Converted to greyscale!\n");
   //binary_threshold(THRESHOLD, input_image, output_image);
-
+  
   int cells = basic_erosion(input_image, output_image, coordinate_x, coordinate_y, MAX_CELLS);
   printf("Image eroded!\n");
 
