@@ -37,7 +37,7 @@ void convert_to_greyscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_C
 
 
 // Function to threshold an image Step 3
-void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
+void binary_threshold(unsigned int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                       unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
     for (int i = 0; i < BMP_WIDTH; i++) {
         for (int j = 0; j < BMP_HEIGTH; j++) {
@@ -58,25 +58,14 @@ void binary_threshold(int threshold, unsigned char input_image[BMP_WIDTH][BMP_HE
 
 //Function that erodes image (basic) Step 4
 int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
-                   unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], 
+                   unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned int threshold, 
                    int coordinate_x[], int coordinate_y[], int capacity) {
-    binary_threshold(THRESHOLD, input_image, output_image);
-    
+    binary_threshold(threshold, input_image, output_image);
+
 
     int total_detections = 0;
     int eroded_cells = 1;
-    /*
-    for (int x = 0; x < BMP_WIDTH; x++) {
-        for (int y = 0; y < BMP_HEIGTH; y++) {
-            for (int c = 0; c < BMP_CHANNELS; c++) {
-                temp_image[x][y][c] = output_image[x][y][c];
-            }
-        }
-    }
-    */
-    
-    
-
+    int erosion_pass = 0;
     
     // Eroded all borders so that we can detect cells that are half off the image
     for (int j = 0; j < BMP_CHANNELS; j++) {
@@ -87,10 +76,10 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
             output_image[i][BMP_WIDTH-1][j] = 0;
         }
     }
-
-    while (eroded_cells) {
+    // erosion pass used to check after # erosions
+    while (eroded_cells && erosion_pass < 3) {
         eroded_cells = 0; // incase of only one erosion occurs
-
+        erosion_pass++;
 
         for (int x = 0; x < BMP_WIDTH; x++) {
             for (int y = 0; y < BMP_HEIGTH; y++) {
@@ -127,6 +116,17 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         total_detections += detect_spots(output_image, coordinate_x, coordinate_y, total_detections, capacity);
         }
     }
+    
+    // this code is used for checking after each erosion. reverts back to output image for generate_image in main
+    
+    for (int x = 0; x < BMP_WIDTH; x++) {
+            for (int y = 0; y < BMP_HEIGTH; y++) {
+                for (int c = 0; c < BMP_CHANNELS; c++) {
+                    output_image[x][y][c] = temp_image[x][y][c];
+                }
+            }
+        }
+    
     return total_detections;
 }
 
@@ -146,7 +146,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
         for (int y = exclusion_frame; y < BMP_HEIGTH - exclusion_frame; y++) {
             
             // Kræv at center-pixel er hvid for at undgå at tælle støjlige nabopixels
-            if (input_image[x][y][2] != 255) continue;
+            if (input_image[x][y][0] != 255 && input_image[x][y][1] != 255 && input_image[x][y][2] != 255 && input_image[x][y][3] != 255 ) continue;
 
 
             /*      tester lige uden min_capture_whites
@@ -165,6 +165,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             }
             */
 
+            // 1 means exclusion zone is black (free of cells)
             int ring_is_black = 1;
 
             // Øverste og nederste ramme for Exclusion frame
@@ -193,8 +194,8 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             coordinate_x[total_detections + detections] = x;
             coordinate_y[total_detections + detections] = y;
             detections++;
-
-            // giver 288 celler i easy7
+            
+            // erase cell
             for (int dx = -exclusion_frame; dx <= exclusion_frame; dx++) {
                 for (int dy = -exclusion_frame; dy <= exclusion_frame; dy++) {
                     for (int c = 0; c < BMP_CHANNELS; c++) {
@@ -205,6 +206,58 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
         }
     }
     return detections;
+}
+
+unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
+    unsigned long histogram[256];
+    int pixel_value;
+    const unsigned long total = BMP_HEIGTH * BMP_WIDTH;
+    
+    for (int i = 0; i < 256 ; i++) histogram[i] = 0;
+    
+    for (int i = 0; i < BMP_WIDTH; i++) {
+        for (int j = 0; j < BMP_HEIGTH; j++) {
+            pixel_value = input_image[i][j][2];
+            histogram[pixel_value]++;
+        }
+    }
+    unsigned int total_sum =  0;
+    for (int i = 0; i < 256; i++) total_sum += i * histogram[i];
+
+    // background: wieght, sum
+    unsigned int wB = 0; 
+    unsigned int sumB = 0.0;
+    // foreground: weight: sum
+    unsigned int wF = 0; 
+    unsigned int sumF = 0.0;
+
+    double muB;
+    double muF;
+    double temp_varainace;
+    double variance=0;
+    unsigned int optimal_threshold = 0;
+
+    for (int i = 0; i < 256 ; i++)
+    {
+        wB +=histogram[i];
+        if (wB==0) continue;
+        wF = total - wB;
+        if (wF==0) continue;
+        sumB += i * histogram[i];
+
+        sumF = total_sum - sumB;
+
+        muB = sumB/(double)wB;
+        muF = sumF/(double)wF;
+        temp_varainace = (double)wB*(double)wF*(muB-muF)*(muB-muF);
+        if (temp_varainace> variance) {
+            variance = temp_varainace;
+            optimal_threshold = i;
+        }
+        
+    }
+    
+    return optimal_threshold;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

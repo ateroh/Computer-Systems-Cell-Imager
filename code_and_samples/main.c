@@ -21,7 +21,7 @@
 // Globale billede-arrays
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
-
+unsigned int threshold;
 
 
 //Main function
@@ -59,22 +59,25 @@ int main(int argc, char** argv)
   //Run inversion
   //invert(input_image,output_image);
 
-  printf("Inverted image!\n");
+  //printf("Inverted image!\n");
 
   
-  //convert_to_greyscale(input_image, output_image);
+  convert_to_greyscale(input_image, output_image);
   printf("Converted to greyscale!\n");
+
   //binary_threshold(THRESHOLD, input_image, output_image);
   
-  int cells = basic_erosion(input_image, output_image, coordinate_x, coordinate_y, MAX_CELLS);
+  threshold = otsu_method(output_image);
+  printf("Otsu calculated threshold: %u (original was 90)\n", threshold);
+  int cells = basic_erosion(input_image, output_image, threshold, coordinate_x, coordinate_y, MAX_CELLS);
   printf("Image eroded!\n");
 
   printf("Antal celler: %d\n", cells);
   for (int i = 0; i < cells && i < MAX_CELLS; i++) {
     printf("Cell %d: (%d, %d)\n", i + 1, coordinate_x[i], coordinate_y[i]);
   }
-
-  generate_output_image(input_image, output_image, cells, coordinate_x, coordinate_y);
+  // to test per erosion change input_image to output_image and edit basic_erosion
+  generate_output_image(output_image, output_image, cells, coordinate_x, coordinate_y);
 
   //Save image to file
   write_bitmap(output_image, argv[2]);
