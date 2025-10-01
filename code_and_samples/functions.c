@@ -3,7 +3,7 @@
 # include "functions.h"
 
 
-#define THRESHOLD 90
+#define THRESHOLD 120
 #define MIN_CAPTURE_WHITES 5
 
 unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
@@ -75,6 +75,20 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         }
     }
     */
+    
+    
+
+    
+    // Eroded all borders so that we can detect cells that are half off the image
+    for (int j = 0; j < BMP_CHANNELS; j++) {
+        for (int i = 0; i < BMP_WIDTH; i++) {
+            output_image[0][i][j] = 0;
+            output_image[BMP_HEIGTH-1][i][j] = 0;
+            output_image[i][0][j] = 0;
+            output_image[i][BMP_WIDTH-1][j] = 0;
+        }
+    }
+
     while (eroded_cells) {
         eroded_cells = 0; // incase of only one erosion occurs
 
@@ -86,6 +100,8 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
                 }
             }
         }
+
+        
 
         for (int x = 1; x < BMP_WIDTH - 1; x++) {
             // we go from 1 to width-1 to avoid borders
