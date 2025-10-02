@@ -77,7 +77,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         }
     }
     // erosion pass used to check after # erosions
-    while (eroded_cells && erosion_pass < 3) {
+    while (eroded_cells && erosion_pass < 4) {
         eroded_cells = 0; // incase of only one erosion occurs
         erosion_pass++;
 
@@ -170,16 +170,14 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
 
             // Øverste og nederste ramme for Exclusion frame
             for (int dx = -exclusion_frame; dx <= exclusion_frame && ring_is_black; dx++) {
-                if (input_image[x + dx][y - exclusion_frame][2] == 255
-                    || input_image[x + dx][y + exclusion_frame][2] == 255 )  {
+                if (input_image[x + dx][y - exclusion_frame][2] == 255 || input_image[x + dx][y + exclusion_frame][2] == 255 )  {
                     ring_is_black = 0;
                     break;
                 }
             }
             // Venstre og højre ramme af exclusion frame
             for (int dy = -exclusion_frame; dy <= exclusion_frame && ring_is_black; dy++) {
-                if (input_image[x - exclusion_frame][y + dy][2] == 255
-                    || input_image[x + exclusion_frame][y + dy][2] == 255) {
+                if (input_image[x - exclusion_frame][y + dy][2] == 255 || input_image[x + exclusion_frame][y + dy][2] == 255) {
                     ring_is_black = 0;
                     break;
                 }
@@ -211,7 +209,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
 unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
     unsigned long histogram[256];
     int pixel_value;
-    const unsigned long total = BMP_HEIGTH * BMP_WIDTH;
+    unsigned long total = BMP_HEIGTH * BMP_WIDTH;
     
     for (int i = 0; i < 256 ; i++) histogram[i] = 0;
     
