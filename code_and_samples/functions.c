@@ -1,6 +1,7 @@
 # include "cbmp.h"
 # include <stdio.h>
 # include "functions.h"
+# include <string.h>
 
 //included this for abs function
 #include <stdlib.h>
@@ -90,13 +91,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         eroded_cells = 0; // incase of only one erosion occurs
         //erosion_pass++;
 
-        for (int x = 0; x < BMP_WIDTH; x++) {
-            for (int y = 0; y < BMP_HEIGTH; y++) {
-                for (int c = 0; c < BMP_CHANNELS; c++) {
-                    temp_image[x][y][c] = output_image[x][y][c];
-                }
-            }
-        }
+        memcpy(temp_image, output_image, sizeof(temp_image));
 
         
 
@@ -299,9 +294,6 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
     return optimal_threshold;
 }
 
-int water_shedding(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned int threshold, int coordinate_x[], int coordinate_y[], int capacity) {
-
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                         STEP 6: Generate output image                          //
