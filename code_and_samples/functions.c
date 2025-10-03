@@ -2,6 +2,9 @@
 # include <stdio.h>
 # include "functions.h"
 
+//included this for abs function
+#include <stdlib.h>
+
 
 #define THRESHOLD 90
 
@@ -69,17 +72,23 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
     
     // Eroded all borders so that we can detect cells that are half off the image
     for (int j = 0; j < BMP_CHANNELS; j++) {
-        for (int i = 0; i < BMP_WIDTH; i++) {
-            output_image[0][i][j] = 0;
-            output_image[BMP_HEIGTH-1][i][j] = 0;
-            output_image[i][0][j] = 0;
-            output_image[i][BMP_WIDTH-1][j] = 0;
+        for (int x = 0; x < BMP_WIDTH; x++) {
+            output_image[x][0][j] = 0;
+            output_image[x][BMP_HEIGTH - 1][j] = 0;
         }
+        // Zero left and right columns (x = 0 and x = BMP_WIDTH-1)
+        for (int y = 0; y < BMP_HEIGTH; y++) {
+            output_image[0][y][j] = 0;
+            output_image[BMP_WIDTH - 1][y][j] = 0;
     }
+}
+
+    
+
     // erosion pass used to check after # erosions
-    while (eroded_cells && erosion_pass < 4) {
+    while (eroded_cells > 0 /*&& erosion_pass < 3*/) {
         eroded_cells = 0; // incase of only one erosion occurs
-        erosion_pass++;
+        //erosion_pass++;
 
         for (int x = 0; x < BMP_WIDTH; x++) {
             for (int y = 0; y < BMP_HEIGTH; y++) {
@@ -115,10 +124,11 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         } else {
         total_detections += detect_spots(output_image, coordinate_x, coordinate_y, total_detections, capacity);
         }
+
     }
     
     // this code is used for checking after each erosion. reverts back to output image for generate_image in main
-    
+    /*
     for (int x = 0; x < BMP_WIDTH; x++) {
             for (int y = 0; y < BMP_HEIGTH; y++) {
                 for (int c = 0; c < BMP_CHANNELS; c++) {
@@ -126,17 +136,18 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
                 }
             }
         }
+    */
     
     return total_detections;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                         STEP 5: DETECT SPOTS                                   //
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Detect Spot                                   
 int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[], int total_detections, int capacity) {
     // Konstanter for vinduet
     int capture = 6; // halv størrelse for 12x12 (capture)
     int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
+    int min_separation = 12;
     int detections = 0;
 
     if (total_detections >= capacity) return 0;
@@ -146,24 +157,8 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
         for (int y = exclusion_frame; y < BMP_HEIGTH - exclusion_frame; y++) {
             
             // Kræv at center-pixel er hvid for at undgå at tælle støjlige nabopixels
-            if (input_image[x][y][0] != 255 && input_image[x][y][1] != 255 && input_image[x][y][2] != 255 && input_image[x][y][3] != 255 ) continue;
+            if (input_image[x][y][2] != 255 ) continue;
 
-
-            /*      tester lige uden min_capture_whites
-
-            //  Tæl hvide pixels i 12x12 capture-området
-            int white_count = 0;
-            for (int dx = -capture; dx <= capture - 1; dx++) {
-                for (int dy = -capture; dy <= capture - 1; dy++) {
-                    if (input_image[x + dx][y + dy][2] == 255) {
-                        white_count++;
-                    }
-                }
-            }
-            if (white_count < MIN_CAPTURE_WHITES) {
-                continue; // for få hvide pixels -> sandsynligvis støj
-            }
-            */
 
             // 1 means exclusion zone is black (free of cells)
             int ring_is_black = 1;
@@ -186,7 +181,11 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                 continue; // intet at fange omkring dette center
             }
 
+            
+
+
             if (total_detections + detections >= capacity) return detections;
+
 
             // Registrer detektion og sætter 12x12 til sort
             coordinate_x[total_detections + detections] = x;
@@ -194,6 +193,42 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             detections++;
             
             // erase cell
+            int changed = 1;
+            int erase_radius = 8; // How far to look for connected pixels
+            
+            while (changed) {
+                changed = 0;
+                
+                for (int dx = -erase_radius; dx <= erase_radius; dx++) {
+                    for (int dy = -erase_radius; dy <= erase_radius; dy++) {
+                        int nx = x + dx;
+                        int ny = y + dy;
+                        
+                        if (nx < 0 || nx >= BMP_WIDTH || ny < 0 || ny >= BMP_HEIGTH) continue;
+                        
+                        if (input_image[nx][ny][2] == 255) {
+                            // Check if adjacent to an already-erased pixel
+                            int adjacent_to_black = 0;
+                            
+                            if (nx > 0 && input_image[nx-1][ny][2] == 0) adjacent_to_black = 1;
+                            if (nx < BMP_WIDTH-1 && input_image[nx+1][ny][2] == 0) adjacent_to_black = 1;
+                            if (ny > 0 && input_image[nx][ny-1][2] == 0) adjacent_to_black = 1;
+                            if (ny < BMP_HEIGTH-1 && input_image[nx][ny+1][2] == 0) adjacent_to_black = 1;
+                            
+                            if (adjacent_to_black || (dx == 0 && dy == 0)) {
+                                for (int c = 0; c < BMP_CHANNELS; c++) {
+                                    input_image[nx][ny][c] = 0;
+                                }
+                                changed = 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+            /*
             for (int dx = -exclusion_frame; dx <= exclusion_frame; dx++) {
                 for (int dy = -exclusion_frame; dy <= exclusion_frame; dy++) {
                     for (int c = 0; c < BMP_CHANNELS; c++) {
@@ -201,8 +236,14 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                     }
                 }
             }
+            */
+            
+            // code to jump to next cell
+            
+            
         }
     }
+    
     return detections;
 }
 
@@ -256,6 +297,10 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
     }
     
     return optimal_threshold;
+}
+
+int water_shedding(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned int threshold, int coordinate_x[], int coordinate_y[], int capacity) {
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
