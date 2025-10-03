@@ -32,7 +32,7 @@ void convert_to_greyscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_C
                 unsigned char r = input_image[x][y][0];
                 unsigned char g = input_image[x][y][1];
                 unsigned char b = input_image[x][y][2];
-                output_image[x][y][c] = (r + g + b) / 3;
+                output_image[x][y][c] = ((r + g + b) * 85) >> 8;
             }
         }
     }
@@ -82,8 +82,19 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
             output_image[0][y][j] = 0;
             output_image[BMP_WIDTH - 1][y][j] = 0;
     }
-}
-
+} 
+    /*
+    for (int j = 0; j < BMP_CHANNELS; j++) {
+        for (int x = 0; x < BMP_WIDTH; x++) {
+            output_image[x][0][j] = 0;
+            output_image[x][BMP_HEIGTH - 1][j] = 0;
+        }
+        for (int y = 0; y < BMP_HEIGTH; y++) {
+            output_image[0][y][j] = 0;
+            output_image[BMP_WIDTH - 1][y][j] = 0;
+        }
+    }
+    */
     
 
     // erosion pass used to check after # erosions
@@ -138,7 +149,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
 
 
 // Detect Spot                                   
-int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[], int total_detections, int capacity) {
+int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char original_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[], int total_detections, int capacity) {
     // Konstanter for vinduet
     int capture = 6; // halv størrelse for 12x12 (capture)
     int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
@@ -154,6 +165,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             // Kræv at center-pixel er hvid for at undgå at tælle støjlige nabopixels
             if (input_image[x][y][2] != 255 ) continue;
 
+            if (original_image[x][y][2] == 0) continue;
 
             // 1 means exclusion zone is black (free of cells)
             int ring_is_black = 1;
@@ -162,14 +174,14 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             for (int dx = -exclusion_frame; dx <= exclusion_frame && ring_is_black; dx++) {
                 if (input_image[x + dx][y - exclusion_frame][2] == 255 || input_image[x + dx][y + exclusion_frame][2] == 255 )  {
                     ring_is_black = 0;
-                    break;
+                    
                 }
             }
             // Venstre og højre ramme af exclusion frame
             for (int dy = -exclusion_frame; dy <= exclusion_frame && ring_is_black; dy++) {
                 if (input_image[x - exclusion_frame][y + dy][2] == 255 || input_image[x + exclusion_frame][y + dy][2] == 255) {
                     ring_is_black = 0;
-                    break;
+                    
                 }
             }
             if (ring_is_black == 0) {
