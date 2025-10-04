@@ -61,7 +61,6 @@ int main(int argc, char** argv)
 
   //printf("Inverted image!\n");
 
-  
   convert_to_greyscale(input_image, output_image);
   printf("Converted to greyscale!\n");
 

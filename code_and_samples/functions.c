@@ -35,7 +35,7 @@ void convert_to_greyscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_C
                 unsigned char r = input_image[x][y][0];
                 unsigned char g = input_image[x][y][1];
                 unsigned char b = input_image[x][y][2];
-                output_image[x][y][c] = ((r + g + b) * 85) >> 8;
+                output_image[x][y][c] = ((r + g + b) * 85) >> 8; // (r+g+b) / 3
             }
         }
     }
