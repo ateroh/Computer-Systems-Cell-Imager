@@ -17,6 +17,8 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], int coordinat
 
 unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]);
 
+void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]);
+
 void black_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y);
 void light_beige_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y);
 void dark_beige_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y);

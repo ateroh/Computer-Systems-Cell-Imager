@@ -60,8 +60,15 @@ void binary_threshold(unsigned int threshold, unsigned char input_image[BMP_WIDT
 int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                    unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned int threshold, 
                    int coordinate_x[], int coordinate_y[], int capacity) {
+
+
+
+    
     binary_threshold(threshold, input_image, binary_image);
 
+    // Idea comes from stackoverflow
+    morphological_closing(binary_image);
+    
 
     int total_detections = 0;
     int eroded_cells = 1;
@@ -284,6 +291,36 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
     }
     
     return optimal_threshold;
+}
+
+void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
+    static unsigned char temp[BMP_WIDTH][BMP_HEIGTH];
+    
+    // Dilate (
+    memcpy(temp, binary_image, sizeof(temp));
+    for (int x = 1; x < BMP_WIDTH - 1; x++) {
+        for (int y = 1; y < BMP_HEIGTH - 1; y++) {
+            if (temp[x-1][y] == 255 || temp[x+1][y] == 255 ||
+                temp[x][y-1] == 255 || temp[x][y+1] == 255) {
+                binary_image[x][y] = 255;
+            }
+        }
+    }
+    
+    // Erode (shrink back)
+    memcpy(temp, binary_image, sizeof(temp));
+    for (int x = 1; x < BMP_WIDTH - 1; x++) {
+        for (int y = 1; y < BMP_HEIGTH - 1; y++) {
+            if (temp[x][y] == 255) {
+                if (temp[x-1][y] == 255 && temp[x+1][y] == 255 &&
+                    temp[x][y-1] == 255 && temp[x][y+1] == 255) {
+                    // keep white
+                } else {
+                    binary_image[x][y] = 0;
+                }
+            }
+        }
+    }
 }
 
 
