@@ -303,7 +303,7 @@ void generate_output_image(
 
     int cross_length = 10;
 
-    // Kopier originalt billede
+    /*Kopier originalt billede
     for (int x = 0; x < BMP_WIDTH; x++) {
         for (int y = 0; y< BMP_HEIGTH; y++) {
             for (int c = 0; c < BMP_CHANNELS; c++) {
@@ -311,6 +311,10 @@ void generate_output_image(
             }
         }
     }
+    */
+    memcpy(output_image, input_image, sizeof(unsigned char) * BMP_WIDTH * BMP_HEIGTH * BMP_CHANNELS);
+
+
         // Tegn et rødt kryds i centeret af hver fundne celle
 
         for (int i = 0; i < detections; i++) {
