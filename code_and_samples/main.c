@@ -62,7 +62,6 @@ int main(int argc, char** argv)
 
   //printf("Inverted image!\n");
 
-  
   convert_to_greyscale(input_image, output_image);
   printf("Converted to greyscale!\n");
 
@@ -75,9 +74,12 @@ int main(int argc, char** argv)
   printf("Image eroded!\n");
 
   printf("Antal celler: %d\n", cells);
-  for (int i = 0; i < cells && i < MAX_CELLS; i++) {
+
+
+  /*for (int i = 0; i < cells && i < MAX_CELLS; i++) {
     printf("Cell %d: (%d, %d)\n", i + 1, coordinate_x[i], coordinate_y[i]);
-  }
+  } */
+
   // to test per erosion change input_image to output_image and edit basic_erosion
   generate_output_image(input_image, output_image, cells, coordinate_x, coordinate_y);
 
