@@ -65,7 +65,8 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
                    unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned int threshold, 
                    int coordinate_x[], int coordinate_y[], int capacity) {
     binary_threshold(threshold, input_image, output_image);
-
+    static unsigned char original_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+    memcpy(original_image, output_image, sizeof(original_image));
 
     int total_detections = 0;
     int eroded_cells = 1;
@@ -128,7 +129,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         if (total_detections > capacity) {
             total_detections = capacity;
         } else {
-        total_detections += detect_spots(output_image, coordinate_x, coordinate_y, total_detections, capacity);
+        total_detections += detect_spots(output_image, original_image, coordinate_x, coordinate_y, total_detections, capacity);
         }
 
     }
@@ -203,31 +204,14 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             int changed = 1;
             int erase_radius = 8; // How far to look for connected pixels
             
-            while (changed) {
-                changed = 0;
-                
-                for (int dx = -erase_radius; dx <= erase_radius; dx++) {
-                    for (int dy = -erase_radius; dy <= erase_radius; dy++) {
-                        int nx = x + dx;
-                        int ny = y + dy;
-                        
-                        if (nx < 0 || nx >= BMP_WIDTH || ny < 0 || ny >= BMP_HEIGTH) continue;
-                        
-                        if (input_image[nx][ny][2] == 255) {
-                            // Check if adjacent to an already-erased pixel
-                            int adjacent_to_black = 0;
-                            
-                            if (nx > 0 && input_image[nx-1][ny][2] == 0) adjacent_to_black = 1;
-                            if (nx < BMP_WIDTH-1 && input_image[nx+1][ny][2] == 0) adjacent_to_black = 1;
-                            if (ny > 0 && input_image[nx][ny-1][2] == 0) adjacent_to_black = 1;
-                            if (ny < BMP_HEIGTH-1 && input_image[nx][ny+1][2] == 0) adjacent_to_black = 1;
-                            
-                            if (adjacent_to_black || (dx == 0 && dy == 0)) {
-                                for (int c = 0; c < BMP_CHANNELS; c++) {
-                                    input_image[nx][ny][c] = 0;
-                                }
-                                changed = 1;
-                            }
+            for (int dx = -exclusion_frame; dx <= exclusion_frame; dx++) {
+                for (int dy = -exclusion_frame; dy <= exclusion_frame; dy++) {
+                    int nx = x + dx;
+                    int ny = y + dy;
+                    if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
+                        for (int c = 0; c < BMP_CHANNELS; c++) {
+                            input_image[nx][ny][c] = 0;
+                            original_image[nx][ny][c] = 0;  // KEY: erase from original too
                         }
                     }
                 }
@@ -332,7 +316,7 @@ void generate_output_image(
         for (int i = 0; i < detections; i++) {
             int cx = coordinate_x[i];
             int cy = coordinate_y[i];
-
+            
             // Horizontal
             for (int dx = -cross_length; dx <= cross_length; dx++) {
                 int x = cx + dx;
@@ -353,5 +337,116 @@ void generate_output_image(
                     output_image[x][y][2] = 0;
                 }
             }
+            /*int x;
+            int y;
+            int j;
+
+            for (j = -4; j >= -2; j++) {
+                x = cx-5;
+                y = j+cy;
+
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    yellow_duck_color(output_image, x, y);
+                }
+            }
+
+            yellow_duck_color(output_image, cx-4, cy+4);
+
+            for (j = -5; j >= -1; j++) {
+                x = cx-4;
+                y = j+cy;
+
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    yellow_duck_color(output_image, x, y);
+                }
+            }
+
+            for (j = -6; j >= 5; j++) {
+                for (int r = -3; r >= -1; r++) {
+                    x = cx-r;
+                    y = j+cy;
+
+                    if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                        yellow_duck_color(output_image, x, y);
+                    }
+                }
+            }
+
+            for (j = 1; j >= 5; j++) {
+                x = cx;
+                y = j + cy;
+
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    yellow_duck_color(output_image, x, y);
+                }
+            }
+
+            for (j = -6; j >= -1; j++) {
+                x = cx;
+                y = j + cy;
+
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    yellow_duck_color(output_image, x, y);
+                }
+            }
+
+            for (j = 2; j >= 4; j++) {
+                x = cx;
+                y = j + cy;
+
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    yellow_duck_color(output_image, x, y);
+                }
+            }
+            for (j = -6; j >= 0; j++) {
+                for (int r = 1; r >= 3; r++) {
+                    x = cx+r;
+                    y = j + cy;
+
+                    if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                        yellow_duck_color(output_image, x, y);
+                    }
+                }
+            }
+
+            for (j = -5; j >= -1; j++) {
+                x = cx+4;
+                y = j + cy;
+
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    yellow_duck_color(output_image, x, y);
+                }
+            }
+
+            for (j = -4; j >= 0; j++) {
+                x = cx+5;
+                y = j + cy;
+
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    yellow_duck_color(output_image, x, y);
+                }
+            }
+
+            orange_duck_color(output_image, cx-4, cy+3);
+            orange_duck_color(output_image, cx-6, cy+2);
+            orange_duck_color(output_image, cx-5, cy+2);
+            orange_duck_color(output_image, cx-4, cy+2);
+            orange_duck_color(output_image, cx-5, cy+1);
+            orange_duck_color(output_image, cx-4, cy+1);
+            orange_duck_color(output_image, cx-3, cy+1);
+            */
+
         }
+}
+
+void yellow_duck_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y) {
+    output_image[x][y][0] = 255;
+    output_image[x][y][1] = 255;
+    output_image[x][y][2] = 0;
+}
+
+void orange_duck_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y) {
+    output_image[x][y][0] = 255;
+    output_image[x][y][1] = 165;
+    output_image[x][y][2] = 0;
 }

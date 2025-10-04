@@ -17,13 +17,9 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
 
 unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]);
 
-int water_shedding(
-    unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
-    unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
-    unsigned int threshold,
-    int coordinate_x[],
-    int coordinate_y[],
-    int capacity);
+void yellow_duck_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y);
+
+void orange_duck_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y);
 
 void generate_output_image(
     unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
