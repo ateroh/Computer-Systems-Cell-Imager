@@ -9,7 +9,7 @@
 
 #define THRESHOLD 90
 
-unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH];
 
 //Function to invert pixels of an image (negative)
 void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
@@ -42,23 +42,10 @@ void convert_to_greyscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_C
 
 // Function to threshold an image Step 3
 void binary_threshold(unsigned int threshold, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
-                      unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
-    for (int i = 0; i < BMP_WIDTH; i++) {
-        for (int j = 0; j < BMP_HEIGTH; j++) {
-            /*
-            for (int c = 0; c < BMP_CHANNELS; c++) {
-                unsigned char post_threshold_value;
-
-                if (input_image[i][j][0] > threshold) {
-                    post_threshold_value = 255;
-                } else {
-                    post_threshold_value = 0;
-                }
-                output_image[i][j][c] = post_threshold_value;
-            } */
-
-            unsigned char post_threshold_value = (input_image[i][j][0] > threshold) ? 255 : 0;
-            memset(output_image[i][j], post_threshold_value, BMP_CHANNELS);
+                      unsigned char output_image[BMP_WIDTH][BMP_HEIGTH]) {
+    for (int x = 0; x < BMP_WIDTH; x++) {
+        for (int y = 0; y < BMP_HEIGTH; y++) {
+            output_image[x][y] = (input_image[x][y][0] > threshold) ? 255 : 0;
         }
     }
 }
@@ -66,9 +53,9 @@ void binary_threshold(unsigned int threshold, unsigned char input_image[BMP_WIDT
 
 //Function that erodes image (basic) Step 4
 int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
-                   unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned int threshold, 
+                   unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned int threshold, 
                    int coordinate_x[], int coordinate_y[], int capacity) {
-    binary_threshold(threshold, input_image, output_image);
+    binary_threshold(threshold, input_image, binary_image);
 
 
     int total_detections = 0;
@@ -76,17 +63,17 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
     int erosion_pass = 0;
     
     // Eroded all borders so that we can detect cells that are half off the image
-    for (int j = 0; j < BMP_CHANNELS; j++) {
-        for (int x = 0; x < BMP_WIDTH; x++) {
-            output_image[x][0][j] = 0;
-            output_image[x][BMP_HEIGTH - 1][j] = 0;
-        }
-        // Zero left and right columns (x = 0 and x = BMP_WIDTH-1)
-        for (int y = 0; y < BMP_HEIGTH; y++) {
-            output_image[0][y][j] = 0;
-            output_image[BMP_WIDTH - 1][y][j] = 0;
+    
+    for (int x = 0; x < BMP_WIDTH; x++) {
+        binary_image[x][0] = 0;
+        binary_image[x][BMP_HEIGTH - 1] = 0;
     }
-} 
+    // Zero left and right columns (x = 0 and x = BMP_WIDTH-1)
+    for (int y = 0; y < BMP_HEIGTH; y++) {
+        binary_image[0][y] = 0;
+        binary_image[BMP_WIDTH - 1][y] = 0;
+    }
+
     
 
     // erosion pass used to check after # erosions
@@ -94,33 +81,32 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         eroded_cells = 0; // incase of only one erosion occurs
         //erosion_pass++;
 
-        memcpy(temp_image, output_image, sizeof(temp_image));
+        memcpy(temp_image, binary_image, sizeof(temp_image));
 
         
 
         for (int x = 1; x < BMP_WIDTH - 1; x++) {
             // we go from 1 to width-1 to avoid borders
             for (int y = 1; y < BMP_HEIGTH - 1; y++) {
-                if (temp_image[x][y][2] == 255) {
+                if (temp_image[x][y] == 255) {
                     //if the center is white we continue
-                    if (temp_image[x - 1][y][2] == 255
-                        && temp_image[x + 1][y][2] == 255
-                        && temp_image[x][y - 1][2] == 255
-                        && temp_image[x][y + 1][2] == 255
+                    if (temp_image[x - 1][y] == 255
+                        && temp_image[x + 1][y] == 255
+                        && temp_image[x][y - 1] == 255
+                        && temp_image[x][y + 1] == 255
 
-                        //diagonals
-                        /*temp_image[x - 1][y - 1][2] == 255
-                        && temp_image[x + 1][y - 1][2] == 255
-                        && temp_image[x - 1][y + 1][2] == 255
-                        && temp_image[x + 1][y + 1][2] == 255*/
+                        //diagonals - fixes certain problems but erosion becomes too aggresive
+                        /*temp_image[x - 1][y - 1] == 255
+                        && temp_image[x + 1][y - 1] == 255
+                        && temp_image[x - 1][y + 1] == 255
+                        && temp_image[x + 1][y + 1] == 255*/
                         
                         ) {
                         // keep white (do nothing to output)
                     } else {
-                        /* for (int c = 0; c < BMP_CHANNELS; c++) {
-                            output_image[x][y][c] = 0;
-                        } */
-                        memset(output_image[x][y], 0, BMP_CHANNELS);
+                        for (int c = 0; c < BMP_CHANNELS; c++) {
+                            binary_image[x][y] = 0;
+                        }
                         eroded_cells = 1; //erosion occured
                     }
                 }
@@ -129,7 +115,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         if (total_detections > capacity) {
             total_detections = capacity;
         } else {
-        total_detections += detect_spots(output_image, coordinate_x, coordinate_y, total_detections, capacity);
+        total_detections += detect_spots(binary_image, coordinate_x, coordinate_y, total_detections, capacity);
         }
 
     }
@@ -138,9 +124,9 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
     /*
     for (int x = 0; x < BMP_WIDTH; x++) {
             for (int y = 0; y < BMP_HEIGTH; y++) {
-                for (int c = 0; c < BMP_CHANNELS; c++) {
-                    output_image[x][y][c] = temp_image[x][y][c];
-                }
+                
+                output_image[x][y] = temp_image[x][y];
+                
             }
         }
     */
@@ -150,11 +136,10 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
 
 
 // Detect Spot                                   
-int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[], int total_detections, int capacity) {
+int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], int coordinate_x[], int coordinate_y[], int total_detections, int capacity) {
     // Konstanter for vinduet
     int capture = 6; // halv størrelse for 12x12 (capture)
     int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
-    int min_separation = 12;
     int detections = 0;
 
     if (total_detections >= capacity) return 0;
@@ -164,21 +149,21 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
         for (int y = exclusion_frame; y < BMP_HEIGTH - exclusion_frame; y++) {
             
             // Kræv at center-pixel er hvid for at undgå at tælle støjlige nabopixels
-            if (input_image[x][y][2] != 255 ) continue;
+            if (input_image[x][y] != 255 ) continue;
 
             // 1 means exclusion zone is black (free of cells)
             int ring_is_black = 1;
 
             // Øverste og nederste ramme for Exclusion frame
             for (int dx = -exclusion_frame; dx <= exclusion_frame && ring_is_black; dx++) {
-                if (input_image[x + dx][y - exclusion_frame][2] == 255 || input_image[x + dx][y + exclusion_frame][2] == 255 )  {
+                if (input_image[x + dx][y - exclusion_frame] == 255 || input_image[x + dx][y + exclusion_frame] == 255 )  {
                     ring_is_black = 0;
                     
                 }
             }
             // Venstre og højre ramme af exclusion frame
             for (int dy = -exclusion_frame; dy <= exclusion_frame && ring_is_black; dy++) {
-                if (input_image[x - exclusion_frame][y + dy][2] == 255 || input_image[x + exclusion_frame][y + dy][2] == 255) {
+                if (input_image[x - exclusion_frame][y + dy] == 255 || input_image[x + exclusion_frame][y + dy] == 255) {
                     ring_is_black = 0;
                     
                 }
@@ -207,11 +192,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                     int nx = x + dx;
                     int ny = y + dy;
                     if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
-                        /* for (int c = 0; c < BMP_CHANNELS; c++) {
-                            input_image[nx][ny][c] = 0;
-                            
-                        } */
-                        memset(input_image[nx][ny], 0, BMP_CHANNELS);
+                        input_image[nx][ny] = 0; 
                     }
                 }
             }
@@ -228,7 +209,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             }
             */
             
-            // code to jump to next cell
+            
             
             
         }
@@ -244,7 +225,7 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
     
      //for (int i = 0; i < 256 ; i++) histogram[i] = 0;
     memset(histogram, 0, sizeof(histogram));
-
+    
     for (int i = 0; i < BMP_WIDTH; i++) {
         for (int j = 0; j < BMP_HEIGTH; j++) {
             pixel_value = input_image[i][j][2];
@@ -303,15 +284,6 @@ void generate_output_image(
 
     int cross_length = 10;
 
-    /*Kopier originalt billede
-    for (int x = 0; x < BMP_WIDTH; x++) {
-        for (int y = 0; y< BMP_HEIGTH; y++) {
-            for (int c = 0; c < BMP_CHANNELS; c++) {
-                output_image[x][y][c] = input_image[x][y][c];
-            }
-        }
-    }
-    */
     memcpy(output_image, input_image, sizeof(unsigned char) * BMP_WIDTH * BMP_HEIGTH * BMP_CHANNELS);
 
 

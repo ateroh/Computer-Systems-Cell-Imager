@@ -21,6 +21,7 @@
 // Globale billede-arrays
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH];
 unsigned int threshold;
 
 
@@ -70,7 +71,7 @@ int main(int argc, char** argv)
   threshold = otsu_method(output_image);
   printf("Otsu calculated threshold: %u (original was 90)\n", threshold);
 
-  int cells = basic_erosion(input_image, output_image, threshold, coordinate_x, coordinate_y, MAX_CELLS);
+  int cells = basic_erosion(input_image, binary_image, threshold, coordinate_x, coordinate_y, MAX_CELLS);
   printf("Image eroded!\n");
 
   printf("Antal celler: %d\n", cells);
