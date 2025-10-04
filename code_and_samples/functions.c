@@ -296,7 +296,7 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
 void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
     static unsigned char temp[BMP_WIDTH][BMP_HEIGTH];
     
-    // Dilate (
+    // expland out in all directions by one white pixel (this fill the gaps caused by large threshold)
     memcpy(temp, binary_image, sizeof(temp));
     for (int x = 1; x < BMP_WIDTH - 1; x++) {
         for (int y = 1; y < BMP_HEIGTH - 1; y++) {
@@ -307,7 +307,7 @@ void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
         }
     }
     
-    // Erode (shrink back)
+    // if one cell around is black erode it (reverses the expansion on the outside but doesn't create a new hole in the middle) s
     memcpy(temp, binary_image, sizeof(temp));
     for (int x = 1; x < BMP_WIDTH - 1; x++) {
         for (int y = 1; y < BMP_HEIGTH - 1; y++) {
