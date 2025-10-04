@@ -2,12 +2,15 @@
 # include <stdio.h>
 # include "functions.h"
 # include <string.h>
+#include <time.h>
 
 //included this for abs function
 #include <stdlib.h>
 
 
 #define THRESHOLD 90
+
+clock_t start, end, start1, end1;
 
 unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 
@@ -86,11 +89,13 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
             output_image[0][y][j] = 0;
             output_image[BMP_WIDTH - 1][y][j] = 0;
     }
+
 } 
     
 
     // erosion pass used to check after # erosions
     while (eroded_cells > 0 /*&& erosion_pass < 3*/) {
+        start = clock();
         eroded_cells = 0; // incase of only one erosion occurs
         //erosion_pass++;
 
@@ -129,8 +134,15 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         if (total_detections > capacity) {
             total_detections = capacity;
         } else {
+            start1 = clock();
         total_detections += detect_spots(output_image, coordinate_x, coordinate_y, total_detections, capacity);
+            end1 = clock();
+            double time_spent1 = ((double) (end1 - start1)) / CLOCKS_PER_SEC;
+            printf("Time used on detecting spots: %f seconds\n", time_spent1);
         }
+        end = clock();
+        double time_spent = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf("Time used on basic erosion: %f seconds\n", time_spent);
 
     }
     
@@ -232,9 +244,11 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             
             
         }
+
     }
-    
+
     return detections;
+
 }
 
 unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
