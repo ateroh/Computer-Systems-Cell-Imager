@@ -303,7 +303,7 @@ void generate_output_image(
 
     int cross_length = 10;
 
-    /*Kopier originalt billede
+    // Kopier originalt billede
     for (int x = 0; x < BMP_WIDTH; x++) {
         for (int y = 0; y< BMP_HEIGTH; y++) {
             for (int c = 0; c < BMP_CHANNELS; c++) {
@@ -311,146 +311,368 @@ void generate_output_image(
             }
         }
     }
-    */
-    memcpy(output_image, input_image, sizeof(unsigned char) * BMP_WIDTH * BMP_HEIGTH * BMP_CHANNELS);
-
-
         // Tegn et rødt kryds i centeret af hver fundne celle
 
-        for (int i = 0; i < detections; i++) {
-            int cx = coordinate_x[i];
-            int cy = coordinate_y[i];
+    for (int i = 0; i < detections; i++) {
+        int cx = coordinate_x[i];
+        int cy = coordinate_y[i];
             
-            // Horizontal
-            for (int dx = -cross_length; dx <= cross_length; dx++) {
-                int x = cx + dx;
-                int y = cy;
-                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                    output_image[x][y][0] = 255;
-                    output_image[x][y][1] = 0;
-                    output_image[x][y][2] = 0;
-                }
-            }
-            // Vertical
-            for (int dy = -cross_length; dy <= cross_length; dy++) {
-                int x = cx;
-                int y = cy + dy;
-                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                    output_image[x][y][0] = 255;
-                    output_image[x][y][1] = 0;
-                    output_image[x][y][2] = 0;
-                }
-            }
-            /*int x;
-            int y;
-            int j;
-
-            for (j = -4; j >= -2; j++) {
-                x = cx-5;
-                y = j+cy;
-
-                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                    yellow_duck_color(output_image, x, y);
-                }
-            }
-
-            yellow_duck_color(output_image, cx-4, cy+4);
-
-            for (j = -5; j >= -1; j++) {
-                x = cx-4;
-                y = j+cy;
-
-                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                    yellow_duck_color(output_image, x, y);
-                }
-            }
-
-            for (j = -6; j >= 5; j++) {
-                for (int r = -3; r >= -1; r++) {
-                    x = cx-r;
-                    y = j+cy;
-
-                    if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                        yellow_duck_color(output_image, x, y);
-                    }
-                }
-            }
-
-            for (j = 1; j >= 5; j++) {
-                x = cx;
-                y = j + cy;
-
-                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                    yellow_duck_color(output_image, x, y);
-                }
-            }
-
-            for (j = -6; j >= -1; j++) {
-                x = cx;
-                y = j + cy;
-
-                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                    yellow_duck_color(output_image, x, y);
-                }
-            }
-
-            for (j = 2; j >= 4; j++) {
-                x = cx;
-                y = j + cy;
-
-                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                    yellow_duck_color(output_image, x, y);
-                }
-            }
-            for (j = -6; j >= 0; j++) {
-                for (int r = 1; r >= 3; r++) {
-                    x = cx+r;
-                    y = j + cy;
-
-                    if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                        yellow_duck_color(output_image, x, y);
-                    }
-                }
-            }
-
-            for (j = -5; j >= -1; j++) {
-                x = cx+4;
-                y = j + cy;
-
-                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                    yellow_duck_color(output_image, x, y);
-                }
-            }
-
-            for (j = -4; j >= 0; j++) {
-                x = cx+5;
-                y = j + cy;
-
-                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
-                    yellow_duck_color(output_image, x, y);
-                }
-            }
-
-            orange_duck_color(output_image, cx-4, cy+3);
-            orange_duck_color(output_image, cx-6, cy+2);
-            orange_duck_color(output_image, cx-5, cy+2);
-            orange_duck_color(output_image, cx-4, cy+2);
-            orange_duck_color(output_image, cx-5, cy+1);
-            orange_duck_color(output_image, cx-4, cy+1);
-            orange_duck_color(output_image, cx-3, cy+1);
-            */
-
+        // Horizontal
+        /*for (int dx = -cross_length; dx <= cross_length; dx++) {
+            int x = cx + dx;
+            int y = cy;
+                
+            output_image[x][y][0] = 255;
+            output_image[x][y][1] = 0;
+            output_image[x][y][2] = 0;
+                
         }
+        // Vertical
+        for (int dy = -cross_length; dy <= cross_length; dy++) {
+            int x = cx;
+            int y = cy + dy;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                output_image[x][y][0] = 255;
+                output_image[x][y][1] = 0;
+                output_image[x][y][2] = 0;
+            }
+        }*/
+
+        int dx;
+        int dy;
+        int x;
+        int y;
+        for (dx = -8; dx <= -5; dx++) {
+            x = cx+dx;
+            y = cy - 8;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }
+        }
+
+        for (dx = -2; dx <= 1; dx++) {
+            x = cx+dx;
+            y = cy - 8;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }
+        }
+
+        for (dx = 4; dx <= 7; dx++) {
+            x = cx+dx;
+            y = cy - 8;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }
+        }
+
+        for (dy = -7; dy <= -5; dy++) {
+            x = cx-8;
+            y = cy+dy;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }
+            x = cx+7;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }
+        }
+
+        black_teemo_color(output_image, cx-4, cy-7);
+        black_teemo_color(output_image, cx-3, cy-7);
+        black_teemo_color(output_image, cx+2, cy-7);
+        black_teemo_color(output_image, cx+3, cy-7);
+        black_teemo_color(output_image, cx+4, cy-6);
+        black_teemo_color(output_image, cx+5, cy-5);
+        black_teemo_color(output_image, cx+6, cy-4);
+        black_teemo_color(output_image, cx-5, cy-6);
+        black_teemo_color(output_image, cx-6, cy-5);
+        black_teemo_color(output_image, cx-7, cy-4);
+
+        for (dx = -7; dx <= 6; dx++) {
+            x = cx + dx;
+            y = cy - 3;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }   
+        }
+
+        black_teemo_color(output_image, cx-6, cy-2);
+        black_teemo_color(output_image, cx+5, cy-2);
+        black_teemo_color(output_image, cx-7, cy-1);
+        black_teemo_color(output_image, cx+6, cy-1);
+        black_teemo_color(output_image, cx-6, cy);
+        black_teemo_color(output_image, cx+5, cy);
+        black_teemo_color(output_image, cx-5, cy+1);
+        black_teemo_color(output_image, cx+4, cy+1);
+
+        for (dx = -4; dx <= -2; dx++) {
+            x = cx + dx;
+            y = cy + 2;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }   
+        }
+
+        for (dx = -1; dx <= 1; dx++) {
+            x = cx + dx;
+            y = cy + 3;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }   
+        }
+
+        for (dx = 2; dx <= 3; dx++) {
+            x = cx + dx;
+            y = cy + 2;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }   
+        }
+
+        black_teemo_color(output_image, cx-5, cy+3);
+        black_teemo_color(output_image, cx+4, cy+3);
+        black_teemo_color(output_image, cx-6, cy+4);
+        black_teemo_color(output_image, cx-6, cy+5);
+        black_teemo_color(output_image, cx-5, cy+6);
+        black_teemo_color(output_image, cx+5, cy+4);
+        black_teemo_color(output_image, cx+5, cy+5);
+        black_teemo_color(output_image, cx+4, cy+6);
+
+        for (dy = 4; dy <= 9; dy++) {
+            x = cx - 4;
+            y = cy + dy;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }   
+            x = cx + 3;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                black_teemo_color(output_image, x, y);
+            }  
+        }
+
+        black_teemo_color(output_image, cx-3, cy+9);
+        black_teemo_color(output_image, cx-2, cy+9);
+        black_teemo_color(output_image, cx-1, cy+8);
+        black_teemo_color(output_image, cx, cy+8);
+        black_teemo_color(output_image, cx+1, cy+9);
+        black_teemo_color(output_image, cx+2, cy+9);
+
+        for (dx = -7; dx <= -5; dx++) {
+            x = cx + dx;
+            y = cy - 7;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                light_beige_teemo_color(output_image, x, y);
+            }   
+        }
+        light_beige_teemo_color(output_image, cx-7, cy-6);
+        light_beige_teemo_color(output_image, cx-7, cy-5);
+
+        for (dx = 4; dx <= 6; dx++) {
+            x = cx + dx;
+            y = cy - 7;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                light_beige_teemo_color(output_image, x, y);
+            }   
+        }
+        light_beige_teemo_color(output_image, cx+6, cy-6);
+        light_beige_teemo_color(output_image, cx+6, cy-5);
+
+        for (dx = -5; dx <= 4; dx++) {
+            for (dy = -2; dy <= 0; dy++) {
+                x = cx + dx;
+                y = cy + dy;
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    light_beige_teemo_color(output_image, x, y);
+                }   
+            }
+        }
+        light_beige_teemo_color(output_image, cx-6, cy-1);
+        light_beige_teemo_color(output_image, cx+5, cy-1);
+        for (dx = -4; dx <= 3; dx++) {
+            x = cx + dx;
+            y = cy + 1;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                light_beige_teemo_color(output_image, x, y);
+            }   
+        }
+        for (dx = -1; dx <= 1; dx++) {
+            x = cx + dx;
+            y = cy + 2;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                light_beige_teemo_color(output_image, x, y);
+            }   
+        }
+
+        light_beige_teemo_color(output_image, cx-3, cy+4);
+        for (dx = -3; dx <= 2; dx++) {
+            for (dy = 5; dy <= 6; dy++) {
+                x = cx + dx;
+                y = cy + dy;
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    light_beige_teemo_color(output_image, x, y);
+                }   
+            }    
+        }
+
+        for (dx = -3; dx <= 3; dx++) {
+            for (dy = -2; dy <= 0; dy++) {
+                x = cx + dx;
+                y = cy + dy;
+                if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                    dark_beige_teemo_color(output_image, x, y);
+                }   
+            }
+        }
+        for (dx = -3; dx <= 0; dx++) {
+            x = cx + dx;
+            y = cy + 7;
+            if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
+                dark_beige_teemo_color(output_image, x, y);
+            }   
+        }
+
+        brown_teemo_color(output_image, cx-6, cy-6);
+        brown_teemo_color(output_image, cx+5, cy-6);
+        brown_teemo_color(output_image, cx, cy);
+        brown_teemo_color(output_image, cx+1, cy+7);
+        brown_teemo_color(output_image, cx+2, cy+7);
+
+        black_teemo_color(output_image, cx-3, cy-1);
+        black_teemo_color(output_image, cx-1, cy-1);
+        black_teemo_color(output_image, cx+1, cy-1);
+        black_teemo_color(output_image, cx+3, cy-1);
+        black_teemo_color(output_image, cx-2, cy-2);
+        black_teemo_color(output_image, cx+2, cy-2);
+
+        green_teemo_color(output_image, cx-6, cy-4);
+        green_teemo_color(output_image, cx-5, cy-4);
+        green_teemo_color(output_image, cx-5, cy-5);
+        green_teemo_color(output_image, cx-4, cy-6);
+        green_teemo_color(output_image, cx-2, cy-7);
+        green_teemo_color(output_image, cx-1, cy-6);
+        green_teemo_color(output_image, cx, cy-6);
+        green_teemo_color(output_image, cx+1, cy-6);
+
+        green_teemo_color(output_image, cx-5, cy+4);
+        green_teemo_color(output_image, cx-5, cy+5);
+        green_teemo_color(output_image, cx-3, cy+8);
+        green_teemo_color(output_image, cx-2, cy+8);
+
+        dark_green_teemo_color(output_image, cx-1, cy-7);
+        dark_green_teemo_color(output_image, cx, cy-7);
+        dark_green_teemo_color(output_image, cx+1, cy-7);
+        dark_green_teemo_color(output_image, cx, cy-4);
+        dark_green_teemo_color(output_image, cx+5, cy-4);
+
+        dark_green_teemo_color(output_image, cx+4, cy+4);
+        dark_green_teemo_color(output_image, cx+4, cy+5);
+        dark_green_teemo_color(output_image, cx+1, cy+8);
+        dark_green_teemo_color(output_image, cx+2, cy+8);
+
+        red_teemo_color(output_image, cx-4, cy-4);
+        red_teemo_color(output_image, cx-4, cy-5);
+        red_teemo_color(output_image, cx-3, cy-6);
+        red_teemo_color(output_image, cx+1, cy-4);
+        red_teemo_color(output_image, cx+1, cy-5);
+        red_teemo_color(output_image, cx+2, cy-6);
+
+        red_teemo_color(output_image, cx-4, cy+3);
+        red_teemo_color(output_image, cx-2, cy+3);
+        red_teemo_color(output_image, cx+2, cy+3);
+        red_teemo_color(output_image, cx-1, cy+4);
+        red_teemo_color(output_image, cx+1, cy+4);
+
+        dark_red_teemo_color(output_image, cx-3, cy-4);
+        dark_red_teemo_color(output_image, cx-2, cy-4);
+        dark_red_teemo_color(output_image, cx-1, cy-4);
+        dark_red_teemo_color(output_image, cx-1, cy-5);
+        dark_red_teemo_color(output_image, cx-2, cy-6);
+        dark_red_teemo_color(output_image, cx, cy-5);
+        dark_red_teemo_color(output_image, cx+2, cy-4);
+        dark_red_teemo_color(output_image, cx+3, cy-4);
+        dark_red_teemo_color(output_image, cx+4, cy-4);
+        dark_red_teemo_color(output_image, cx+4, cy-5);
+        dark_red_teemo_color(output_image, cx+3, cy-6);
+
+        dark_red_teemo_color(output_image, cx-3, cy+3);
+        dark_red_teemo_color(output_image, cx+3, cy+3);
+        dark_red_teemo_color(output_image, cx-2, cy+4);
+        dark_red_teemo_color(output_image, cx, cy+4);
+        dark_red_teemo_color(output_image, cx+2, cy+4);
+
+        light_blue_teemo_color(output_image, cx-3, cy-5);
+        light_blue_teemo_color(output_image, cx+2, cy-5);
+
+        light_blue_teemo_color(output_image, cx, cy-9);
+        light_blue_teemo_color(output_image, cx-1, cy-11);
+
+        blue_teemo_color(output_image, cx-2, cy-5);
+        blue_teemo_color(output_image, cx+3, cy-5);
+
+        blue_teemo_color(output_image, cx-1, cy-9);
+        blue_teemo_color(output_image, cx, cy-10);
+        blue_teemo_color(output_image, cx+1, cy-10);
+        blue_teemo_color(output_image, cx, cy-11);
+    }
 }
 
-void yellow_duck_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y) {
-    output_image[x][y][0] = 255;
+void black_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 0;
+    output_image[x][y][1] = 0;
+    output_image[x][y][2] = 0;
+}
+
+void light_beige_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 224;
+    output_image[x][y][1] = 171;
+    output_image[x][y][2] = 139;
+}
+
+void dark_beige_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 198;
+    output_image[x][y][1] = 136;
+    output_image[x][y][2] = 99;
+}
+
+void brown_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 176;
+    output_image[x][y][1] = 108;
+    output_image[x][y][2] = 73;
+}
+
+void green_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 14;
     output_image[x][y][1] = 255;
     output_image[x][y][2] = 0;
 }
 
-void orange_duck_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y) {
-    output_image[x][y][0] = 255;
-    output_image[x][y][1] = 165;
+void dark_green_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 31;
+    output_image[x][y][1] = 198;
     output_image[x][y][2] = 0;
+}
+
+void red_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 255;
+    output_image[x][y][1] = 0;
+    output_image[x][y][2] = 0;
+}
+
+void dark_red_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 200;
+    output_image[x][y][1] = 0;
+    output_image[x][y][2] = 5;
+}
+
+void light_blue_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 135;
+    output_image[x][y][1] = 206;
+    output_image[x][y][2] = 251;
+}
+
+void blue_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int  x, int  y) {
+    output_image[x][y][0] = 101;
+    output_image[x][y][1] = 155;
+    output_image[x][y][2] = 223;
 }
