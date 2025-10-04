@@ -310,7 +310,7 @@ void generate_output_image(
         int cy = coordinate_y[i];
             
         // Horizontal
-        /*for (int dx = -cross_length; dx <= cross_length; dx++) {
+        for (int dx = -cross_length; dx <= cross_length; dx++) {
             int x = cx + dx;
             int y = cy;
                 
@@ -328,8 +328,8 @@ void generate_output_image(
                 output_image[x][y][1] = 0;
                 output_image[x][y][2] = 0;
             }
-        }*/
-
+        }
+        /*
         int dx;
         int dy;
         int x;
@@ -606,6 +606,7 @@ void generate_output_image(
         blue_teemo_color(output_image, cx, cy-10);
         blue_teemo_color(output_image, cx+1, cy-10);
         blue_teemo_color(output_image, cx, cy-11);
+        */
     }
 }
 
