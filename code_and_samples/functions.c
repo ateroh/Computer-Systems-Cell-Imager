@@ -45,6 +45,7 @@ void binary_threshold(unsigned int threshold, unsigned char input_image[BMP_WIDT
                       unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
     for (int i = 0; i < BMP_WIDTH; i++) {
         for (int j = 0; j < BMP_HEIGTH; j++) {
+            /*
             for (int c = 0; c < BMP_CHANNELS; c++) {
                 unsigned char post_threshold_value;
 
@@ -54,7 +55,10 @@ void binary_threshold(unsigned int threshold, unsigned char input_image[BMP_WIDT
                     post_threshold_value = 0;
                 }
                 output_image[i][j][c] = post_threshold_value;
-            }
+            } */
+
+            unsigned char post_threshold_value = (input_image[i][j][0] > threshold) ? 255 : 0;
+            memset(output_image[i][j], post_threshold_value, BMP_CHANNELS);
         }
     }
 }
@@ -65,8 +69,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
                    unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned int threshold, 
                    int coordinate_x[], int coordinate_y[], int capacity) {
     binary_threshold(threshold, input_image, output_image);
-    static unsigned char original_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
-    memcpy(original_image, output_image, sizeof(original_image));
+
 
     int total_detections = 0;
     int eroded_cells = 1;
@@ -84,18 +87,6 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
             output_image[BMP_WIDTH - 1][y][j] = 0;
     }
 } 
-    /*
-    for (int j = 0; j < BMP_CHANNELS; j++) {
-        for (int x = 0; x < BMP_WIDTH; x++) {
-            output_image[x][0][j] = 0;
-            output_image[x][BMP_HEIGTH - 1][j] = 0;
-        }
-        for (int y = 0; y < BMP_HEIGTH; y++) {
-            output_image[0][y][j] = 0;
-            output_image[BMP_WIDTH - 1][y][j] = 0;
-        }
-    }
-    */
     
 
     // erosion pass used to check after # erosions
@@ -115,12 +106,21 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
                     if (temp_image[x - 1][y][2] == 255
                         && temp_image[x + 1][y][2] == 255
                         && temp_image[x][y - 1][2] == 255
-                        && temp_image[x][y + 1][2] == 255) {
+                        && temp_image[x][y + 1][2] == 255
+
+                        //diagonals
+                        /*temp_image[x - 1][y - 1][2] == 255
+                        && temp_image[x + 1][y - 1][2] == 255
+                        && temp_image[x - 1][y + 1][2] == 255
+                        && temp_image[x + 1][y + 1][2] == 255*/
+                        
+                        ) {
                         // keep white (do nothing to output)
                     } else {
-                        for (int c = 0; c < BMP_CHANNELS; c++) {
+                        /* for (int c = 0; c < BMP_CHANNELS; c++) {
                             output_image[x][y][c] = 0;
-                        }
+                        } */
+                        memset(output_image[x][y], 0, BMP_CHANNELS);
                         eroded_cells = 1; //erosion occured
                     }
                 }
@@ -129,7 +129,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         if (total_detections > capacity) {
             total_detections = capacity;
         } else {
-        total_detections += detect_spots(output_image, original_image, coordinate_x, coordinate_y, total_detections, capacity);
+        total_detections += detect_spots(output_image, coordinate_x, coordinate_y, total_detections, capacity);
         }
 
     }
@@ -150,7 +150,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
 
 
 // Detect Spot                                   
-int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char original_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[], int total_detections, int capacity) {
+int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int coordinate_x[], int coordinate_y[], int total_detections, int capacity) {
     // Konstanter for vinduet
     int capture = 6; // halv størrelse for 12x12 (capture)
     int exclusion_frame = capture + 1; // +1 pixel ring (exclusion frame)
@@ -165,8 +165,6 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
             
             // Kræv at center-pixel er hvid for at undgå at tælle støjlige nabopixels
             if (input_image[x][y][2] != 255 ) continue;
-
-            if (original_image[x][y][2] == 0) continue;
 
             // 1 means exclusion zone is black (free of cells)
             int ring_is_black = 1;
@@ -209,10 +207,11 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
                     int nx = x + dx;
                     int ny = y + dy;
                     if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
-                        for (int c = 0; c < BMP_CHANNELS; c++) {
+                        /* for (int c = 0; c < BMP_CHANNELS; c++) {
                             input_image[nx][ny][c] = 0;
-                            original_image[nx][ny][c] = 0;  // KEY: erase from original too
-                        }
+                            
+                        } */
+                        memset(input_image[nx][ny], 0, BMP_CHANNELS);
                     }
                 }
             }
@@ -239,12 +238,13 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
 }
 
 unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]) {
-    unsigned long histogram[256];
+    unsigned long histogram[256] = {0};
     int pixel_value;
     unsigned long total = BMP_HEIGTH * BMP_WIDTH;
     
-    for (int i = 0; i < 256 ; i++) histogram[i] = 0;
-    
+     //for (int i = 0; i < 256 ; i++) histogram[i] = 0;
+    memset(histogram, 0, sizeof(histogram));
+
     for (int i = 0; i < BMP_WIDTH; i++) {
         for (int j = 0; j < BMP_HEIGTH; j++) {
             pixel_value = input_image[i][j][2];
@@ -256,10 +256,10 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
 
     // background: wieght, sum
     unsigned int wB = 0; 
-    unsigned int sumB = 0.0;
+    unsigned int sumB = 0;
     // foreground: weight: sum
     unsigned int wF = 0; 
-    unsigned int sumF = 0.0;
+    unsigned int sumF = 0;
 
     double muB;
     double muF;
