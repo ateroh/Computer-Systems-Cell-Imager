@@ -21,6 +21,8 @@ void yellow_duck_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHA
 
 void orange_duck_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y);
 
+void black_duck_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int x, int y);
+
 void generate_output_image(
     unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
     unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
