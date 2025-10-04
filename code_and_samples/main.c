@@ -16,7 +16,7 @@
 #include "functions.h"
 
 #define THRESHOLD 90
-#define MAX_CELLS 1000
+#define MAX_CELLS 310
 
 // Globale billede-arrays
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
