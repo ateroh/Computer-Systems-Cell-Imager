@@ -345,6 +345,142 @@ void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
     free(temp);
 }
 
+// Distance transform 
+void distance_transform(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], int distance[BMP_WIDTH][BMP_HEIGTH]) {
+    //white pixels =  insanely large distance && black = 0
+    for (int x = 0; x < BMP_WIDTH; x++) {
+        for (int y = 0; y < BMP_HEIGTH; y++) {
+            distance[x][y] = (binary_image[x][y] == 255) ? 9999 : 0;
+        }
+    }
+    
+    // Forward pass (top-left to bottom-right)
+    for (int x = 1; x < BMP_WIDTH; x++) {
+        for (int y = 1; y < BMP_HEIGTH; y++) {
+            if (binary_image[x][y] == 255) {
+                int min_dist = distance[x][y];
+                
+                // Check 4 neighbors
+                if (distance[x-1][y] + 1 < min_dist) min_dist = distance[x-1][y] + 1;
+                if (distance[x][y-1] + 1 < min_dist) min_dist = distance[x][y-1] + 1;
+                if (distance[x-1][y-1] + 1 < min_dist) min_dist = distance[x-1][y-1] + 1;
+                if (x < BMP_WIDTH-1 && distance[x+1][y-1] + 1 < min_dist) min_dist = distance[x+1][y-1] + 1;
+                
+                distance[x][y] = min_dist;
+            }
+        }
+    }
+    
+    // Backward pass (bottom-right to top-left)
+    for (int x = BMP_WIDTH - 2; x >= 0; x--) {
+        for (int y = BMP_HEIGTH - 2; y >= 0; y--) {
+            if (binary_image[x][y] == 255) {
+                int min_dist = distance[x][y];
+                
+                // Check 4 neighbors
+                if (distance[x+1][y] + 1 < min_dist) min_dist = distance[x+1][y] + 1;
+                if (distance[x][y+1] + 1 < min_dist) min_dist = distance[x][y+1] + 1;
+                if (distance[x+1][y+1] + 1 < min_dist) min_dist = distance[x+1][y+1] + 1;
+                if (x > 0 && distance[x-1][y+1] + 1 < min_dist) min_dist = distance[x-1][y+1] + 1;
+                
+                distance[x][y] = min_dist;
+            }
+        }
+    }
+}
+
+// Find local maxima 
+int find_local_maxima(int distance[BMP_WIDTH][BMP_HEIGTH], int coord_x[], int coord_y[], int capacity, int min_distance_threshold) {
+    int count = 0;
+    int suppression_radius = 8; // Prevent multiple detections per cell
+    
+    // Mark detected regions to avoid duplicates
+    unsigned char *detected = calloc(BMP_WIDTH * BMP_HEIGTH, 1);
+    if (detected == NULL) return 0;
+    unsigned char (*detected_2d)[BMP_HEIGTH] = (unsigned char (*)[BMP_HEIGTH])detected;
+    
+    for (int x = suppression_radius; x < BMP_WIDTH - suppression_radius; x++) {
+        for (int y = suppression_radius; y < BMP_HEIGTH - suppression_radius; y++) {
+            if (distance[x][y] < min_distance_threshold) continue;
+            if (detected_2d[x][y]) continue;
+            
+            int current = distance[x][y];
+            
+            // Check if local maximum in larger neighborhood
+            int is_max = 1;
+            for (int dx = -2; dx <= 2 && is_max; dx++) {
+                for (int dy = -2; dy <= 2 && is_max; dy++) {
+                    if (dx == 0 && dy == 0) continue;
+                    if (distance[x+dx][y+dy] > current) {
+                        is_max = 0;
+                    }
+                }
+            }
+            
+            if (is_max && count < capacity) {
+                coord_x[count] = x;
+                coord_y[count] = y;
+                count++;
+                
+                // Suppress nearby detections
+                for (int dx = -suppression_radius; dx <= suppression_radius; dx++) {
+                    for (int dy = -suppression_radius; dy <= suppression_radius; dy++) {
+                        int nx = x + dx;
+                        int ny = y + dy;
+                        if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
+                            detected_2d[nx][ny] = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    free(detected);
+    return count;
+}
+
+// Main detection function using distance transform
+int detect_cells_distance_transform(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], 
+                                     unsigned int threshold, 
+                                     int coordinate_x[], 
+                                     int coordinate_y[], 
+                                     int capacity) {
+    
+    // Allocate binary image and distance map
+    unsigned char *binary = malloc(BMP_WIDTH * BMP_HEIGTH);
+    int *distance = malloc(BMP_WIDTH * BMP_HEIGTH * sizeof(int));
+    
+    if (binary == NULL || distance == NULL) {
+        fprintf(stderr, "Memory allocation failed in distance transform\n");
+        if (binary) free(binary);
+        if (distance) free(distance);
+        return 0;
+    }
+    
+    // Create 2D views
+    unsigned char (*binary_2d)[BMP_HEIGTH] = (unsigned char (*)[BMP_HEIGTH])binary;
+    int (*distance_2d)[BMP_HEIGTH] = (int (*)[BMP_HEIGTH])distance;
+    
+    // Threshold to binary
+    binary_threshold(threshold, input_image, binary_2d);
+    
+    // Apply morphological closing to fill holes
+    morphological_closing(binary_2d);
+    
+    // Compute distance transform
+    distance_transform(binary_2d, distance_2d);
+    
+    // Find local maxima (cell centers)
+    // min_distance_threshold of 3-5 works well for typical cells
+    int cells = find_local_maxima(distance_2d, coordinate_x, coordinate_y, capacity, 2);
+    
+    free(binary);
+    free(distance);
+    
+    return cells;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                         STEP 6: Generate output image                          //
