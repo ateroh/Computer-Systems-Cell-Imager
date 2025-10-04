@@ -462,6 +462,7 @@ int detect_cells_distance_transform(unsigned char input_image[BMP_WIDTH][BMP_HEI
     unsigned char (*binary_2d)[BMP_HEIGTH] = (unsigned char (*)[BMP_HEIGTH])binary;
     int (*distance_2d)[BMP_HEIGTH] = (int (*)[BMP_HEIGTH])distance;
     
+    
     // Threshold to binary
     binary_threshold(threshold, input_image, binary_2d);
     

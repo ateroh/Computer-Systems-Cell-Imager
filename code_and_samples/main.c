@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
   //binary_threshold(THRESHOLD, input_image, output_image);
   
-  threshold = otsu_method(output_image);
+  threshold = otsu_method(output_image)-10;
   printf("Otsu calculated threshold: %u (original was 90)\n", threshold);
 
   //int cells = basic_erosion(input_image, binary_image, threshold, coordinate_x, coordinate_y, MAX_CELLS);
