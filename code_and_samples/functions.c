@@ -293,27 +293,48 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
     return optimal_threshold;
 }
 
+
+// Due to high threshold from otsus some cells had 1-4 pixel holes in them. Morphological_closing attempts to fix this. This won't work on large holes.
 void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
-    static unsigned char temp[BMP_WIDTH][BMP_HEIGTH];
+    
+    unsigned char *temp = malloc(BMP_WIDTH * BMP_HEIGTH);
+    if (temp == NULL) {
+        fprintf(stderr, "Memory allocation for morphological closing failed\n");
+        return;
+    }
+    
     
     // expland out in all directions by one white pixel (this fill the gaps caused by large threshold)
-    memcpy(temp, binary_image, sizeof(temp));
     for (int x = 1; x < BMP_WIDTH - 1; x++) {
         for (int y = 1; y < BMP_HEIGTH - 1; y++) {
-            if (temp[x-1][y] == 255 || temp[x+1][y] == 255 ||
-                temp[x][y-1] == 255 || temp[x][y+1] == 255) {
+            int id_x = x * BMP_HEIGTH + y;
+            temp[id_x] = binary_image[x][y];
+        }
+    }
+    
+    for (int x = 1; x < BMP_WIDTH - 1; x++) {
+        for (int y = 1; y < BMP_HEIGTH - 1; y++) {
+            int id_x = x * BMP_HEIGTH + y;
+            if (temp[id_x-BMP_HEIGTH] == 255 || temp[id_x+BMP_HEIGTH] == 255 ||
+                temp[id_x-1] == 255 || temp[id_x+1] == 255) {
                 binary_image[x][y] = 255;
             }
         }
     }
     
     // if one cell around is black erode it (reverses the expansion on the outside but doesn't create a new hole in the middle) s
-    memcpy(temp, binary_image, sizeof(temp));
+    for (int x = 0; x < BMP_WIDTH; x++) {
+        for (int y = 0; y < BMP_HEIGTH; y++) {
+            temp[x * BMP_HEIGTH + y] = binary_image[x][y];
+        }
+    }
+    
     for (int x = 1; x < BMP_WIDTH - 1; x++) {
         for (int y = 1; y < BMP_HEIGTH - 1; y++) {
-            if (temp[x][y] == 255) {
-                if (temp[x-1][y] == 255 && temp[x+1][y] == 255 &&
-                    temp[x][y-1] == 255 && temp[x][y+1] == 255) {
+            int idx = x * BMP_HEIGTH + y;
+            if (temp[idx] == 255) {
+                if (temp[idx-BMP_HEIGTH] == 255 && temp[idx+BMP_HEIGTH] == 255 &&
+                    temp[idx-1] == 255 && temp[idx+1] == 255) {
                     // keep white
                 } else {
                     binary_image[x][y] = 0;
@@ -321,6 +342,7 @@ void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
             }
         }
     }
+    free(temp);
 }
 
 
