@@ -66,7 +66,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
     
     binary_threshold(threshold, input_image, binary_image);
 
-    // Idea comes from stackoverflow
+    // Idea comes from YouTune (Check references i rapporten)
     morphological_closing(binary_image);
     
 
