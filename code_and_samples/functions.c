@@ -379,53 +379,52 @@ void distance_transform(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], int d
 
 // Find local maxima 
 int find_local_maxima(int distance[BMP_WIDTH][BMP_HEIGTH], int coord_x[], int coord_y[], int capacity, int min_distance_threshold) {
-    int count = 0;
-    int suppression_radius = 8; // Prevent multiple detections per cell
+     int count = 0;
     
-    // Mark detected regions to avoid duplicates
-    unsigned char *detected = calloc(BMP_WIDTH * BMP_HEIGTH, 1);
-    if (detected == NULL) return 0;
-    unsigned char (*detected_2d)[BMP_HEIGTH] = (unsigned char (*)[BMP_HEIGTH])detected;
-    
-    for (int x = suppression_radius; x < BMP_WIDTH - suppression_radius; x++) {
-        for (int y = suppression_radius; y < BMP_HEIGTH - suppression_radius; y++) {
+    for (int x = 10; x < BMP_WIDTH - 10; x++) {
+        for (int y = 10; y < BMP_HEIGTH - 10; y++) {
             if (distance[x][y] < min_distance_threshold) continue;
-            if (detected_2d[x][y]) continue;
             
             int current = distance[x][y];
-            
-            // Check if local maximum in larger neighborhood
-            int is_max = 1;
-            for (int dx = -2; dx <= 2 && is_max; dx++) {
-                for (int dy = -2; dy <= 2 && is_max; dy++) {
-                    if (dx == 0 && dy == 0) continue;
-                    if (distance[x+dx][y+dy] > current) {
-                        is_max = 0;
-                    }
-                }
+
+            int peak_current = 1;
+            // 3x3 area
+            for (int i = -2; i <= 2; i++) {
+                for (int j = -2; j <= 2; j++) {
+                    if (i == 0 && j == 0) continue;
+                    if (distance[x+i][y+j] > current) {
+                        peak_current = 0;
+                        break;
+                    }   
+                }   
             }
-            
-            if (is_max && count < capacity) {
-                coord_x[count] = x;
-                coord_y[count] = y;
-                count++;
-                
-                // Suppress nearby detections
-                for (int dx = -suppression_radius; dx <= suppression_radius; dx++) {
-                    for (int dy = -suppression_radius; dy <= suppression_radius; dy++) {
-                        int nx = x + dx;
-                        int ny = y + dy;
-                        if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
-                            detected_2d[nx][ny] = 1;
-                        }
+            if (peak_current) {
+                int close = 0;
+                for (int i = 0; i < count; i++) {
+                    int diff_x = coord_x[i] - x;
+                    int diff_y = coord_y[i] - y;
+                    if (diff_x < 0) diff_x = -diff_x;
+                    if (diff_y < 0) diff_y = -diff_y;
+
+                    int dist = diff_x + diff_y;
+                    if (dist < 15) {
+                        close = 1;
+                        break;
                     }
+                    
+                }
+                if (!close && count < capacity) {
+                    coord_x[count] = x;
+                    coord_y[count] = y;
+                    count++;
                 }
             }
         }
     }
-    
-    free(detected);
+
     return count;
+            
+    
 }
 
 // Main detection function using distance transform
