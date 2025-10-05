@@ -44,4 +44,10 @@ void generate_output_image(
     int coordinate_x[],
     int coordinate_y[]);
 
+int detect_edge_cells(
+    unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH],
+    int coordinate_x[],
+    int coordinate_y[],
+    int existing_detections,
+    int capacity);
 #endif // FUNCTIONS_H

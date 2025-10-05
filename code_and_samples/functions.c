@@ -12,8 +12,6 @@
 
 clock_t start, end, start1, end1;
 
-clock_t start, end, start1, end1;
-
 unsigned char temp_image[BMP_WIDTH][BMP_HEIGTH];
 
 //Function to invert pixels of an image (negative)
@@ -58,24 +56,24 @@ void binary_threshold(unsigned int threshold, unsigned char input_image[BMP_WIDT
 
 //Function that erodes image (basic) Step 4
 int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
-                   unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned int threshold, 
+                   unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned int threshold,
                    int coordinate_x[], int coordinate_y[], int capacity) {
 
 
 
-    
+
     binary_threshold(threshold, input_image, binary_image);
 
     // Idea comes from YouTune (Check references i rapporten)
     morphological_closing(binary_image);
-    
+
 
     int total_detections = 0;
     int eroded_cells = 1;
     int erosion_pass = 0;
-    
+
     // Eroded all borders so that we can detect cells that are half off the image
-    
+
     for (int x = 0; x < BMP_WIDTH; x++) {
         binary_image[x][0] = 0;
         binary_image[x][BMP_HEIGTH - 1] = 0;
@@ -86,7 +84,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         binary_image[BMP_WIDTH - 1][y] = 0;
     }
 
-    
+
 
     // erosion pass used to check after # erosions
     while (eroded_cells > 0 /*&& erosion_pass < 3*/) {
@@ -96,7 +94,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
 
         memcpy(temp_image, binary_image, sizeof(temp_image));
 
-        
+
 
         for (int x = 1; x < BMP_WIDTH - 1; x++) {
             // we go from 1 to width-1 to avoid borders
@@ -113,7 +111,7 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
                         && temp_image[x + 1][y - 1] == 255
                         && temp_image[x - 1][y + 1] == 255
                         && temp_image[x + 1][y + 1] == 255*/
-                        
+
                         ) {
                         // keep white (do nothing to output)
                     } else {
@@ -139,23 +137,23 @@ int basic_erosion(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]
         printf("Time used on basic erosion: %f seconds\n", time_spent);
 
     }
-    
+
     // this code is used for checking after each erosion. reverts back to output image for generate_image in main
     /*
     for (int x = 0; x < BMP_WIDTH; x++) {
             for (int y = 0; y < BMP_HEIGTH; y++) {
-                
+
                 output_image[x][y] = temp_image[x][y];
-                
+
             }
         }
     */
-    
+
     return total_detections;
 }
 
 
-// Detect Spot                                   
+// Detect Spot
 int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], int coordinate_x[], int coordinate_y[], int total_detections, int capacity) {
     // Konstanter for vinduet
     int capture = 6; // halv størrelse for 12x12 (capture)
@@ -167,7 +165,7 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], int coordinat
     // Loop kun hvor hele 14x14 (Exclusion frame) er inde i billedet
     for (int x = exclusion_frame; x < BMP_WIDTH - exclusion_frame; x++) {
         for (int y = exclusion_frame; y < BMP_HEIGTH - exclusion_frame; y++) {
-            
+
             // Kræv at center-pixel er hvid for at undgå at tælle støjlige nabopixels
             if (input_image[x][y] != 255 ) continue;
 
@@ -178,21 +176,21 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], int coordinat
             for (int dx = -exclusion_frame; dx <= exclusion_frame && ring_is_black; dx++) {
                 if (input_image[x + dx][y - exclusion_frame] == 255 || input_image[x + dx][y + exclusion_frame] == 255 )  {
                     ring_is_black = 0;
-                    
+
                 }
             }
             // Venstre og højre ramme af exclusion frame
             for (int dy = -exclusion_frame; dy <= exclusion_frame && ring_is_black; dy++) {
                 if (input_image[x - exclusion_frame][y + dy] == 255 || input_image[x + exclusion_frame][y + dy] == 255) {
                     ring_is_black = 0;
-                    
+
                 }
             }
             if (ring_is_black == 0) {
                 continue; // intet at fange omkring dette center
             }
 
-            
+
 
 
             if (total_detections + detections >= capacity) return detections;
@@ -202,17 +200,17 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], int coordinat
             coordinate_x[total_detections + detections] = x;
             coordinate_y[total_detections + detections] = y;
             detections++;
-            
+
             // erase cell
             int changed = 1;
             int erase_radius = 8; // How far to look for connected pixels
-            
+
             for (int dx = -exclusion_frame; dx <= exclusion_frame; dx++) {
                 for (int dy = -exclusion_frame; dy <= exclusion_frame; dy++) {
                     int nx = x + dx;
                     int ny = y + dy;
                     if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
-                        input_image[nx][ny] = 0; 
+                        input_image[nx][ny] = 0;
                     }
                 }
             }
@@ -228,10 +226,10 @@ int detect_spots(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], int coordinat
                 }
             }
             */
-            
-            
-            
-            
+
+
+
+
         }
 
     }
@@ -244,10 +242,10 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
     unsigned long histogram[256] = {0};
     int pixel_value;
     unsigned long total = BMP_HEIGTH * BMP_WIDTH;
-    
+
      //for (int i = 0; i < 256 ; i++) histogram[i] = 0;
     memset(histogram, 0, sizeof(histogram));
-    
+
     for (int i = 0; i < BMP_WIDTH; i++) {
         for (int j = 0; j < BMP_HEIGTH; j++) {
             pixel_value = input_image[i][j][2];
@@ -258,10 +256,10 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
     for (int i = 0; i < 256; i++) total_sum += i * histogram[i];
 
     // background: wieght, sum
-    unsigned int wB = 0; 
+    unsigned int wB = 0;
     unsigned int sumB = 0;
     // foreground: weight: sum
-    unsigned int wF = 0; 
+    unsigned int wF = 0;
     unsigned int sumF = 0;
 
     double muB;
@@ -287,23 +285,23 @@ unsigned int otsu_method(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
             variance = temp_varainace;
             optimal_threshold = i;
         }
-        
+
     }
-    
+
     return optimal_threshold;
 }
 
 
 // Due to high threshold from otsus some cells had 1-4 pixel holes in them. Morphological_closing attempts to fix this. This won't work on large holes.
 void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
-    
+
     unsigned char *temp = malloc(BMP_WIDTH * BMP_HEIGTH);
     if (temp == NULL) {
         fprintf(stderr, "Memory allocation for morphological closing failed\n");
         return;
     }
-    
-    
+
+
     // expland out in all directions by one white pixel (this fill the gaps caused by large threshold)
     for (int x = 1; x < BMP_WIDTH - 1; x++) {
         for (int y = 1; y < BMP_HEIGTH - 1; y++) {
@@ -311,7 +309,7 @@ void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
             temp[id_x] = binary_image[x][y];
         }
     }
-    
+
     for (int x = 1; x < BMP_WIDTH - 1; x++) {
         for (int y = 1; y < BMP_HEIGTH - 1; y++) {
             int id_x = x * BMP_HEIGTH + y;
@@ -321,14 +319,14 @@ void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
             }
         }
     }
-    
+
     // if one cell around is black erode it (reverses the expansion on the outside but doesn't create a new hole in the middle) s
     for (int x = 0; x < BMP_WIDTH; x++) {
         for (int y = 0; y < BMP_HEIGTH; y++) {
             temp[x * BMP_HEIGTH + y] = binary_image[x][y];
         }
     }
-    
+
     for (int x = 1; x < BMP_WIDTH - 1; x++) {
         for (int y = 1; y < BMP_HEIGTH - 1; y++) {
             int idx = x * BMP_HEIGTH + y;
@@ -345,7 +343,7 @@ void morphological_closing(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]) {
     free(temp);
 }
 
-// Distance transform 
+// Distance transform
 void distance_transform(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], int distance[BMP_WIDTH][BMP_HEIGTH]) {
     //white pixels =  insanely large distance && black = 0
     for (int x = 0; x < BMP_WIDTH; x++) {
@@ -359,7 +357,7 @@ void distance_transform(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], int d
             for (int y = 1; y < BMP_HEIGTH - 1; y++) {
                 if (binary_image[x][y] == 255) {
                     int min_dist = distance[x][y];
-                    
+
                     // Tjekker alle 8 nabo.
                     if (distance[x-1][y-1] + 1 < min_dist) min_dist = distance[x-1][y-1] + 1;
                     if (distance[x][y-1] + 1 < min_dist) min_dist = distance[x][y-1] + 1;
@@ -369,7 +367,7 @@ void distance_transform(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], int d
                     if (distance[x-1][y+1] + 1 < min_dist) min_dist = distance[x-1][y+1] + 1;
                     if (distance[x][y+1] + 1 < min_dist) min_dist = distance[x][y+1] + 1;
                     if (distance[x+1][y+1] + 1 < min_dist) min_dist = distance[x+1][y+1] + 1;
-                    
+
                     distance[x][y] = min_dist;
                 }
             }
@@ -377,14 +375,14 @@ void distance_transform(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], int d
     }
 }
 
-// Find local maxima 
+// Find local maxima
 int find_local_maxima(int distance[BMP_WIDTH][BMP_HEIGTH], int coord_x[], int coord_y[], int capacity, int min_distance_threshold) {
      int count = 0;
-    
+
     for (int x = 10; x < BMP_WIDTH - 10; x++) {
         for (int y = 10; y < BMP_HEIGTH - 10; y++) {
             if (distance[x][y] < min_distance_threshold) continue;
-            
+
             int current = distance[x][y];
 
             int peak_current = 1;
@@ -395,8 +393,8 @@ int find_local_maxima(int distance[BMP_WIDTH][BMP_HEIGTH], int coord_x[], int co
                     if (distance[x+i][y+j] > current) {
                         peak_current = 0;
                         break;
-                    }   
-                }   
+                    }
+                }
             }
             if (peak_current) {
                 int close = 0;
@@ -411,7 +409,7 @@ int find_local_maxima(int distance[BMP_WIDTH][BMP_HEIGTH], int coord_x[], int co
                         close = 1;
                         break;
                     }
-                    
+
                 }
                 if (!close && count < capacity) {
                     coord_x[count] = x;
@@ -423,34 +421,34 @@ int find_local_maxima(int distance[BMP_WIDTH][BMP_HEIGTH], int coord_x[], int co
     }
 
     return count;
-            
-    
+
+
 }
 
 // Main detection function using distance transform
-int detect_cells_distance_transform(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], 
-                                     unsigned int threshold, 
-                                     int coordinate_x[], 
-                                     int coordinate_y[], 
+int detect_cells_distance_transform(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
+                                     unsigned int threshold,
+                                     int coordinate_x[],
+                                     int coordinate_y[],
                                      int capacity) {
-    
+
     static unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH];
     static int distance_map[BMP_WIDTH][BMP_HEIGTH];
-    
-    
+
+
     // Threshold to binary
     binary_threshold(threshold, input_image, binary_image);
-    
+
     // smorphological closing to fill holes
     morphological_closing(binary_image);
-    
+
     // Compute distance transform
     distance_transform(binary_image, distance_map);
-    
+
     // Find cells
     int cells = find_local_maxima(distance_map, coordinate_x, coordinate_y, capacity, 3);
-    
-    return cells;
+    int edge_cells = detect_edge_cells(binary_image, coordinate_x, coordinate_y, cells, capacity);
+    return cells + edge_cells;
 }
 
 
@@ -475,16 +473,16 @@ void generate_output_image(
     for (int i = 0; i < detections; i++) {
         int cx = coordinate_x[i];
         int cy = coordinate_y[i];
-            
+
         // Horizontal
         for (int dx = -cross_length; dx <= cross_length; dx++) {
             int x = cx + dx;
             int y = cy;
-                
+
             output_image[x][y][0] = 255;
             output_image[x][y][1] = 0;
             output_image[x][y][2] = 0;
-                
+
         }
         // Vertical
         for (int dy = -cross_length; dy <= cross_length; dy++) {
@@ -553,7 +551,7 @@ void generate_output_image(
             y = cy - 3;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 black_teemo_color(output_image, x, y);
-            }   
+            }
         }
 
         black_teemo_color(output_image, cx-6, cy-2);
@@ -570,7 +568,7 @@ void generate_output_image(
             y = cy + 2;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 black_teemo_color(output_image, x, y);
-            }   
+            }
         }
 
         for (dx = -1; dx <= 1; dx++) {
@@ -578,7 +576,7 @@ void generate_output_image(
             y = cy + 3;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 black_teemo_color(output_image, x, y);
-            }   
+            }
         }
 
         for (dx = 2; dx <= 3; dx++) {
@@ -586,7 +584,7 @@ void generate_output_image(
             y = cy + 2;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 black_teemo_color(output_image, x, y);
-            }   
+            }
         }
 
         black_teemo_color(output_image, cx-5, cy+3);
@@ -603,11 +601,11 @@ void generate_output_image(
             y = cy + dy;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 black_teemo_color(output_image, x, y);
-            }   
+            }
             x = cx + 3;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 black_teemo_color(output_image, x, y);
-            }  
+            }
         }
 
         black_teemo_color(output_image, cx-3, cy+9);
@@ -622,7 +620,7 @@ void generate_output_image(
             y = cy - 7;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 light_beige_teemo_color(output_image, x, y);
-            }   
+            }
         }
         light_beige_teemo_color(output_image, cx-7, cy-6);
         light_beige_teemo_color(output_image, cx-7, cy-5);
@@ -632,7 +630,7 @@ void generate_output_image(
             y = cy - 7;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 light_beige_teemo_color(output_image, x, y);
-            }   
+            }
         }
         light_beige_teemo_color(output_image, cx+6, cy-6);
         light_beige_teemo_color(output_image, cx+6, cy-5);
@@ -643,7 +641,7 @@ void generate_output_image(
                 y = cy + dy;
                 if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                     light_beige_teemo_color(output_image, x, y);
-                }   
+                }
             }
         }
         light_beige_teemo_color(output_image, cx-6, cy-1);
@@ -653,14 +651,14 @@ void generate_output_image(
             y = cy + 1;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 light_beige_teemo_color(output_image, x, y);
-            }   
+            }
         }
         for (dx = -1; dx <= 1; dx++) {
             x = cx + dx;
             y = cy + 2;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 light_beige_teemo_color(output_image, x, y);
-            }   
+            }
         }
 
         light_beige_teemo_color(output_image, cx-3, cy+4);
@@ -670,8 +668,8 @@ void generate_output_image(
                 y = cy + dy;
                 if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                     light_beige_teemo_color(output_image, x, y);
-                }   
-            }    
+                }
+            }
         }
 
         for (dx = -3; dx <= 3; dx++) {
@@ -680,7 +678,7 @@ void generate_output_image(
                 y = cy + dy;
                 if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                     dark_beige_teemo_color(output_image, x, y);
-                }   
+                }
             }
         }
         for (dx = -3; dx <= 0; dx++) {
@@ -688,7 +686,7 @@ void generate_output_image(
             y = cy + 7;
             if (x >= 0 && x < BMP_WIDTH && y >= 0 && y < BMP_HEIGTH) {
                 dark_beige_teemo_color(output_image, x, y);
-            }   
+            }
         }
 
         brown_teemo_color(output_image, cx-6, cy-6);
@@ -835,4 +833,156 @@ void blue_teemo_color(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
     output_image[x][y][0] = 101;
     output_image[x][y][1] = 155;
     output_image[x][y][2] = 223;
+}
+// Detect cells that are partially outside image boundaries
+int detect_edge_cells(
+    unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH],
+    int coordinate_x[],
+    int coordinate_y[],
+    int existing_detections,
+    int capacity) {
+
+    int edge_detections = 0;
+    int edge_margin = 5;  // Check within 5 pixels of edge
+    int min_white_pixels = 25;  // Increased minimum white pixels to reduce false positives
+
+    // Check top and bottom edges
+    for (int x = edge_margin; x < BMP_WIDTH - edge_margin; x += 12) {  // Increased step size
+        // Top edge
+        if (binary_image[x][0] == 255 || binary_image[x][1] == 255 || binary_image[x][2] == 255) {
+            // Count connected white pixels near this position
+            int white_count = 0;
+            for (int dx = -5; dx <= 5; dx++) {
+                for (int dy = 0; dy < 5; dy++) {
+                    int nx = x + dx;
+                    int ny = dy;
+                    if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
+                        if (binary_image[nx][ny] == 255) white_count++;
+                    }
+                }
+            }
+
+            if (white_count >= min_white_pixels) {
+                // Check not too close to existing detections
+                int too_close = 0;
+                for (int i = 0; i < existing_detections + edge_detections; i++) {
+                    int dx = coordinate_x[i] - x;
+                    int dy = coordinate_y[i] - 2;
+                    if (dx*dx + dy*dy < 18*18) {  // Increased separation
+                        too_close = 1;
+                        break;
+                    }
+                }
+
+                if (!too_close && existing_detections + edge_detections < capacity) {
+                    coordinate_x[existing_detections + edge_detections] = x;
+                    coordinate_y[existing_detections + edge_detections] = 2;
+                    edge_detections++;
+                }
+            }
+        }
+
+        // Bottom edge
+        int bottom = BMP_HEIGTH - 1;
+        if (binary_image[x][bottom] == 255 || binary_image[x][bottom-1] == 255 || binary_image[x][bottom-2] == 255) {
+            int white_count = 0;
+            for (int dx = -5; dx <= 5; dx++) {
+                for (int dy = -4; dy < 1; dy++) {
+                    int nx = x + dx;
+                    int ny = bottom + dy;
+                    if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
+                        if (binary_image[nx][ny] == 255) white_count++;
+                    }
+                }
+            }
+
+            if (white_count >= min_white_pixels) {
+                int too_close = 0;
+                for (int i = 0; i < existing_detections + edge_detections; i++) {
+                    int dx = coordinate_x[i] - x;
+                    int dy = coordinate_y[i] - (bottom - 2);
+                    if (dx*dx + dy*dy < 18*18) {
+                        too_close = 1;
+                        break;
+                    }
+                }
+
+                if (!too_close && existing_detections + edge_detections < capacity) {
+                    coordinate_x[existing_detections + edge_detections] = x;
+                    coordinate_y[existing_detections + edge_detections] = bottom - 2;
+                    edge_detections++;
+                }
+            }
+        }
+    }
+
+    // Check left and right edges
+    for (int y = edge_margin; y < BMP_HEIGTH - edge_margin; y += 12) {  // Increased step size
+        // Left edge
+        if (binary_image[0][y] == 255 || binary_image[1][y] == 255 || binary_image[2][y] == 255) {
+            int white_count = 0;
+            for (int dx = 0; dx < 5; dx++) {
+                for (int dy = -5; dy <= 5; dy++) {
+                    int nx = dx;
+                    int ny = y + dy;
+                    if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
+                        if (binary_image[nx][ny] == 255) white_count++;
+                    }
+                }
+            }
+
+            if (white_count >= min_white_pixels) {
+                int too_close = 0;
+                for (int i = 0; i < existing_detections + edge_detections; i++) {
+                    int dx = coordinate_x[i] - 2;
+                    int dy = coordinate_y[i] - y;
+                    if (dx*dx + dy*dy < 18*18) {
+                        too_close = 1;
+                        break;
+                    }
+                }
+
+                if (!too_close && existing_detections + edge_detections < capacity) {
+                    coordinate_x[existing_detections + edge_detections] = 2;
+                    coordinate_y[existing_detections + edge_detections] = y;
+                    edge_detections++;
+                }
+            }
+        }
+
+        // Right edge
+        int right = BMP_WIDTH - 1;
+        if (binary_image[right][y] == 255 || binary_image[right-1][y] == 255 || binary_image[right-2][y] == 255) {
+            int white_count = 0;
+            for (int dx = -4; dx < 1; dx++) {
+                for (int dy = -5; dy <= 5; dy++) {
+                    int nx = right + dx;
+                    int ny = y + dy;
+                    if (nx >= 0 && nx < BMP_WIDTH && ny >= 0 && ny < BMP_HEIGTH) {
+                        if (binary_image[nx][ny] == 255) white_count++;
+                    }
+                }
+            }
+
+            if (white_count >= min_white_pixels) {
+                int too_close = 0;
+                for (int i = 0; i < existing_detections + edge_detections; i++) {
+                    int dx = coordinate_x[i] - (right - 2);
+                    int dy = coordinate_y[i] - y;
+                    if (dx*dx + dy*dy < 18*18) {
+                        too_close = 1;
+                        break;
+                    }
+                }
+
+                if (!too_close && existing_detections + edge_detections < capacity) {
+                    coordinate_x[existing_detections + edge_detections] = right - 2;
+                    coordinate_y[existing_detections + edge_detections] = y;
+                    edge_detections++;
+                }
+            }
+        }
+    }
+
+    return edge_detections;
 }
