@@ -353,37 +353,25 @@ void distance_transform(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], int d
             distance[x][y] = (binary_image[x][y] == 255) ? 9999 : 0;
         }
     }
-    
-    // Forward pass (top-left to bottom-right)
-    for (int x = 1; x < BMP_WIDTH; x++) {
-        for (int y = 1; y < BMP_HEIGTH; y++) {
-            if (binary_image[x][y] == 255) {
-                int min_dist = distance[x][y];
-                
-                // Check 4 neighbors
-                if (distance[x-1][y] + 1 < min_dist) min_dist = distance[x-1][y] + 1;
-                if (distance[x][y-1] + 1 < min_dist) min_dist = distance[x][y-1] + 1;
-                if (distance[x-1][y-1] + 1 < min_dist) min_dist = distance[x-1][y-1] + 1;
-                if (x < BMP_WIDTH-1 && distance[x+1][y-1] + 1 < min_dist) min_dist = distance[x+1][y-1] + 1;
-                
-                distance[x][y] = min_dist;
-            }
-        }
-    }
-    
-    // Backward pass (bottom-right to top-left)
-    for (int x = BMP_WIDTH - 2; x >= 0; x--) {
-        for (int y = BMP_HEIGTH - 2; y >= 0; y--) {
-            if (binary_image[x][y] == 255) {
-                int min_dist = distance[x][y];
-                
-                // Check 4 neighbors
-                if (distance[x+1][y] + 1 < min_dist) min_dist = distance[x+1][y] + 1;
-                if (distance[x][y+1] + 1 < min_dist) min_dist = distance[x][y+1] + 1;
-                if (distance[x+1][y+1] + 1 < min_dist) min_dist = distance[x+1][y+1] + 1;
-                if (x > 0 && distance[x-1][y+1] + 1 < min_dist) min_dist = distance[x-1][y+1] + 1;
-                
-                distance[x][y] = min_dist;
+    // loop through the BMP several times to get distances
+    for (int pass = 0; pass < 15; pass++) {
+        for (int x = 1; x < BMP_WIDTH - 1; x++) {
+            for (int y = 1; y < BMP_HEIGTH - 1; y++) {
+                if (binary_image[x][y] == 255) {
+                    int min_dist = distance[x][y];
+                    
+                    // Tjekker alle 8 nabo.
+                    if (distance[x-1][y-1] + 1 < min_dist) min_dist = distance[x-1][y-1] + 1;
+                    if (distance[x][y-1] + 1 < min_dist) min_dist = distance[x][y-1] + 1;
+                    if (distance[x+1][y-1] + 1 < min_dist) min_dist = distance[x+1][y-1] + 1;
+                    if (distance[x-1][y] + 1 < min_dist) min_dist = distance[x-1][y] + 1;
+                    if (distance[x+1][y] + 1 < min_dist) min_dist = distance[x+1][y] + 1;
+                    if (distance[x-1][y+1] + 1 < min_dist) min_dist = distance[x-1][y+1] + 1;
+                    if (distance[x][y+1] + 1 < min_dist) min_dist = distance[x][y+1] + 1;
+                    if (distance[x+1][y+1] + 1 < min_dist) min_dist = distance[x+1][y+1] + 1;
+                    
+                    distance[x][y] = min_dist;
+                }
             }
         }
     }
@@ -447,37 +435,21 @@ int detect_cells_distance_transform(unsigned char input_image[BMP_WIDTH][BMP_HEI
                                      int coordinate_y[], 
                                      int capacity) {
     
-    // Allocate binary image and distance map
-    unsigned char *binary = malloc(BMP_WIDTH * BMP_HEIGTH);
-    int *distance = malloc(BMP_WIDTH * BMP_HEIGTH * sizeof(int));
-    
-    if (binary == NULL || distance == NULL) {
-        fprintf(stderr, "Memory allocation failed in distance transform\n");
-        if (binary) free(binary);
-        if (distance) free(distance);
-        return 0;
-    }
-    
-    // Create 2D views
-    unsigned char (*binary_2d)[BMP_HEIGTH] = (unsigned char (*)[BMP_HEIGTH])binary;
-    int (*distance_2d)[BMP_HEIGTH] = (int (*)[BMP_HEIGTH])distance;
+    static unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH];
+    static int distance_map[BMP_WIDTH][BMP_HEIGTH];
     
     
     // Threshold to binary
-    binary_threshold(threshold, input_image, binary_2d);
+    binary_threshold(threshold, input_image, binary_image);
     
-    // Apply morphological closing to fill holes
-    morphological_closing(binary_2d);
+    // smorphological closing to fill holes
+    morphological_closing(binary_image);
     
     // Compute distance transform
-    distance_transform(binary_2d, distance_2d);
+    distance_transform(binary_image, distance_map);
     
-    // Find local maxima (cell centers)
-    // min_distance_threshold of 3-5 works well for typical cells
-    int cells = find_local_maxima(distance_2d, coordinate_x, coordinate_y, capacity, 2);
-    
-    free(binary);
-    free(distance);
+    // Find cells
+    int cells = find_local_maxima(distance_map, coordinate_x, coordinate_y, capacity, 3);
     
     return cells;
 }
